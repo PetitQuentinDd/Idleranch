@@ -1,0 +1,236 @@
+/* RESET & FONTS */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fcfaf6;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.currency-display {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* CARTES DU RANCH - GROS TEXTES & ULTRA LISIBLES */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pokemon-card {
+    background: white;
+    border-radius: 14px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 2px solid #ecf0f1;
+}
+
+.pokemon-card:hover {
+    transform: translateY(-2px);
+}
+
+.pokemon-card .pokemon-name {
+    font-size: 1.3rem !important; /* Agrandi */
+    font-weight: 800 !important;  /* Ultra Lisible */
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+
+/* Nom doré pour l'évolution par niveau */
+.pokemon-card .pokemon-name.gold {
+    color: #f1c40f;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.pokemon-card .pokemon-level {
+    font-size: 1.1rem !important;
+    font-weight: bold;
+    background: #7f8c8d;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.pokemon-card .pokemon-po {
+    font-size: 1.2rem !important; /* Agrandi */
+    font-weight: bold;
+    color: #27ae60;
+    margin-top: 8px;
+}
+
+/* CADRES DORÉS EXTINCELANTS (ÉVÉNEMENT 20H) */
+.gold-frame {
+    border: 3px solid #f1c40f !important;
+    background: linear-gradient(135deg, #fffdf0 0%, #ffffff 100%) !important;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.6) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.gold-frame::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(30deg);
+    animation: shimmer 4s infinite linear;
+}
+
+@keyframes shimmer {
+    0% { transform: translate(-30%, -30%) rotate(30deg); }
+    100% { transform: translate(30%, 30%) rotate(30deg); }
+}
+
+/* BADGES DE RARETÉ RPG */
+.badge-rarity {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+}
+.badge-commun { background-color: #bdc3c7; }
+.badge-rare { background-color: #2980b9; }
+.badge-epique { background-color: #9b59b6; }
+.badge-legendaire { background-color: #e67e22; }
+.badge-evenement { background-color: #f1c40f; color: #2c3e50; }
+
+/* GRILLE DE RÉSULTAT STYLE IMAGE.PNG */
+.pokemon-grid-result {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.result-card {
+    background: #f5f6fa;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.result-card.selected {
+    border-color: #3498db;
+    background: #e1f5fe;
+}
+
+.pokedex-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: #bdc3c7;
+}
+
+.pokedex-dot.new {
+    background: #2ecc71; /* Vert "New" de image.png */
+}
+
+/* ZONE FOCUS DU BAS (IMAGE.PNG) */
+.focus-box {
+    display: flex;
+    align-items: center;
+    background: #fdfefe;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.focus-box img {
+    width: 64px;
+    height: 64px;
+    margin-right: 20px;
+}
+
+.focus-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+}
+
+.focus-info p {
+    margin: 0 0 8px 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* MODALS GENERALS & DIVERS */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal-content.large {
+    max-width: 600px;
+}
+
+.sac-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.item-slot {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.item-slot:hover, .item-slot.active {
+    border-color: #2ecc71;
+    background: #e8f8f5;
+}
+
+.item-icon { font-size: 1.5rem; margin-right: 15px; }
+.item-name { flex-grow: 1; font-weight: 600; }
+
+.instruction { color: #e67e22; font-weight: bold; font-size: 0.9rem; text-align: center; }
+.hidden { display: none !important; }
+.event-banner { background: #ffeaa7; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 2px solid #f1c40f; }
+.shifumi-buttons button { margin: 5px; padding: 8px 15px; font-weight: bold; cursor: pointer; }
+.chrono { font-weight: bold; color: #e74c3c; margin-top: 5px; }
+.btn-close { margin-top: 15px; width: 100%; padding: 10px; background: #34495e; color: white; border: none; border-radius: 8px; cursor: pointer; }
