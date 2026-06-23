@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Idle Pocket Ranch</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <div class="game-logo-container">
+            <div class="logo-pokeball"></div>
+            <h1 class="logo-text">IDLE POCKET<span>RANCH</span></h1>
+        </div>
+
+        <div id="game-header">
+            <div class="header-items">
+                💰 <span id="money">0</span> PO
+            </div>
+            <div class="header-items">
+                💧 <span id="count-pierreEau">0</span>
+                🔥 <span id="count-pierreFeu">0</span>
+                ⚡ <span id="count-pierreFoudre">0</span>
+                🌙 <span id="count-pierreLune">0</span>
+                🍃 <span id="count-pierrePlante">0</span>
+                <div class="pokeball-btn" onclick="openTab('tab-succes')" title="Objectifs & Réinitialisation"></div>
+            </div>
+        </div>
+
+        <div id="expeditions-active-box" style="display: none;">
+            🧭 Expédition en cours... Retour dans : <span id="expedition-timer">0:00</span>
+        </div>
+
+        <div id="main-content">
+            
+            <div id="tab-enclos" class="tab-content active">
+                <div class="section-title">Mon Enclos (<span id="team-count">0</span>/6)</div>
+                <div id="active-team" class="team-enclosure"></div>
+            </div>
+
+            <div id="tab-stock" class="tab-content">
+                <div class="section-title">Réserve Élevage</div>
+                <div id="reserve" class="reserve-grid"></div>
+            </div>
+
+            <div id="tab-pokedex" class="tab-content">
+                <div class="section-title">Pokédex Kanto</div>
+                <div class="pokedex-progress-container">
+                    <div class="progress-bar-bg">
+                        <div id="pokedex-progress-fill" class="progress-bar-fill"></div>
+                    </div>
+                    <span id="pokedex-count-ratio" class="progress-ratio">0 / 151</span>
+                </div>
+                <div id="pokedex-grid" class="pokedex-grid-layout"></div>
+            </div>
+
+            <div id="tab-map" class="tab-content">
+                <div class="section-title">Explorations & Arène</div>
+                
+                <div style="margin-top: 5px; margin-bottom: 5px;">
+                    <div style="font-size: 10px; color: #94a3b8; margin-bottom: 6px; font-weight: bold;">🗺️ EXPÉDITIONS VIA RANCH :</div>
+                    <div id="zones-container"></div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <div style="font-size: 10px; color: #94a3b8; margin-bottom: 6px; font-weight: bold;">🥊 DÉFIER LES CHAMPIONS :</div>
+                    <div id="arene-selection"></div>
+                    <div id="arene-combat-box" style="display: none;">
+                        <h3 id="combat-title">Combat en cours...</h3>
+                        <div class="combat-hp-flex">
+                            <div class="player-hp-text">Mon Équipe: <span id="player-hp">0</span> PV</div>
+                            <div class="boss-hp-text"><span id="boss-name">Pierre</span>: <span id="boss-hp">0</span> PV</div>
+                        </div>
+                        <p id="combat-log">Le combat commence ! ⚔️</p>
+                    </div>
+                </div>
+
+                <div class="promo-container" style="margin-top: auto;">
+                    <input type="text" id="promo-input-field" class="promo-input" placeholder="CODE PROMO">
+                    <button class="promo-btn" onclick="claimPromoCode()">VALIDER</button>
+                </div>
+            </div>
+
+            <div id="tab-oeufs" class="tab-content">
+                <div class="section-title">Incubateur & Boutique</div>
+                
+                <div class="shop-egg-fullscreen">
+                    <div class="egg-display-container">
+                        <div class="egg-graphic">🥚</div>
+                        <h3>Œuf Pokémon Mystère</h3>
+                        <p>Contient un Pokémon aléatoire de la région de Kanto.</p>
+                        <span class="egg-price-tag">Prix : 5000 PO</span>
+                    </div>
+                    <button class="buy-egg-large-btn" onclick="buyEgg()">ACHETER UN ŒUF</button>
+                </div>
+            </div>
+
+            <div id="tab-succes" class="tab-content">
+                <div class="section-title">Objectifs & Système</div>
+                
+                <div class="reset-box-container">
+                    <p style="color: #94a3b8; font-size: 10px; margin-bottom: 6px;">Réinitialiser complètement votre partie (Action Irréversible) :</p>
+                    <button class="hard-reset-btn" onclick="hardResetGame()">⚠️ RÉINITIALISER LE JEU</button>
+                </div>
+
+                <div style="font-size: 10px; color: #94a3b8; margin-bottom: 6px; font-weight: bold; margin-top: 10px;">🏆 ACCOMPLISSEMENTS :</div>
+                <div id="succes-list-container" style="flex: 1; overflow-y: auto;"></div>
+            </div>
+
+        </div>
+
+        <div class="bottom-navigation">
+            <button class="nav-btn active" id="nav-tab-enclos" onclick="openTab('tab-enclos')">🏡 RANCH</button>
+            <button class="nav-btn" id="nav-tab-stock" onclick="openTab('tab-stock')">📦 STOCK</button>
+            <button class="nav-btn" id="nav-tab-pokedex" onclick="openTab('tab-pokedex')">📲 INDEX</button>
+            <button class="nav-btn" id="nav-tab-map" onclick="openTab('tab-map')">🛒 MAP</button>
+            <button class="nav-btn" id="nav-tab-oeufs" onclick="openTab('tab-oeufs')">🥚 ŒUFS</button>
+        </div>
+
+    </div>
+
+    <script src="pokedex.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
