@@ -431,3 +431,8 @@ body {
     0%, 100% { text-shadow: 0 0 4px rgba(255, 215, 0, 0.5); }
     50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.9); }
 }
+
+.baby-border {
+    border: 3px solid #f472b6 !important;
+    box-shadow: 0 0 10px rgba(244, 114, 182, 0.5);
+}

@@ -74,11 +74,11 @@ const POKEDEX = {
             { name: "Ptéra", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/142.gif", incomePerMin: 260, evolutionCondition: null, nextForm: null },
             { name: "Ronflex", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/143.gif", incomePerMin: 280, evolutionCondition: null, nextForm: null },
             { name: "Évoli", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/133.gif", incomePerMin: 240, evolutionCondition: "special_eevee", nextForm: null },
-            
-        { name: "Canarticho", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/83.png", incomePerMin: 180 },
-        { name: "Kicklee", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/106.png", incomePerMin: 200 },
-        { name: "Tygnon", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/107.png", incomePerMin: 200 },
-        { name: "Levainard", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png", incomePerMin: 250 }
+
+            { name: "Canarticho", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/83.png", incomePerMin: 180 },
+            { name: "Kicklee", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/106.png", incomePerMin: 200 },
+            { name: "Tygnon", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/107.png", incomePerMin: 200 },
+            { name: "Levainard", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png", incomePerMin: 250 }
         ],
         evolutions: {
             "Herbizarre": { name: "Herbizarre", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/2.gif", incomePerMin: 290, evolutionCondition: "level", evolutionLevel: 32, nextForm: "Florizarre" },
@@ -259,6 +259,73 @@ const POKEDEX = {
             { name: "Lugia", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/249.gif", incomePerMin: 550, evolutionCondition: null, nextForm: null },
             { name: "Ho-Oh", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/250.gif", incomePerMin: 560, evolutionCondition: null, nextForm: null },
             { name: "Celebi", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/251.gif", incomePerMin: 520, evolutionCondition: null, nextForm: null }
-        ]
+        ],
+
+        hoenn: {
+            commun: [
+                { name: "Arcko", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/252.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 16, nextForm: "Masko" },
+                { name: "Poussifeu", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/255.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 16, nextForm: "Galifeu" },
+                { name: "Gobou", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/258.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 16, nextForm: "Flobio" },
+                { name: "Medhyèna", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/261.gif", incomePerMin: 75, evolutionCondition: "level", evolutionLevel: 18, nextForm: "Grahyèna" },
+                { name: "Zigzaton", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/263.gif", incomePerMin: 70, evolutionCondition: "level", evolutionLevel: 20, nextForm: "Linéon" },
+                { name: "Chenipotte", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/265.gif", incomePerMin: 60, evolutionCondition: "level", evolutionLevel: 7, nextForm: ["Armulys", "Blindalys"] },
+                { name: "Nénupiot", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/270.gif", incomePerMin: 85, evolutionCondition: "level", evolutionLevel: 14, nextForm: "Lombre" },
+                { name: "Grainipiot", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/273.gif", incomePerMin: 85, evolutionCondition: "level", evolutionLevel: 14, nextForm: "Pifeuil" },
+                { name: "Nirondelle", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/276.gif", incomePerMin: 80, evolutionCondition: "level", evolutionLevel: 22, nextForm: "Hélédelle" },
+                { name: "Goélise", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/278.gif", incomePerMin: 85, evolutionCondition: "level", evolutionLevel: 25, nextForm: "Bekipan" },
+                { name: "Tarsal", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/280.gif", incomePerMin: 100, evolutionCondition: "level", evolutionLevel: 20, nextForm: "Kirlia" },
+                { name: "Arakdo", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/283.gif", incomePerMin: 80, evolutionCondition: "level", evolutionLevel: 22, nextForm: "Maskadra" },
+                { name: "Balignon", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/285.gif", incomePerMin: 90, evolutionCondition: "level", evolutionLevel: 23, nextForm: "Chapignon" },
+                { name: "Parecool", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/287.gif", incomePerMin: 90, evolutionCondition: "level", evolutionLevel: 18, nextForm: "Vigoroth" },
+                { name: "Ningale", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/290.gif", incomePerMin: 80, evolutionCondition: "level", evolutionLevel: 20, nextForm: "Ninjask" },
+                { name: "Chuchmur", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/293.gif", incomePerMin: 85, evolutionCondition: "level", evolutionLevel: 20, nextForm: "Ramboum" },
+                { name: "Makuhita", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/296.gif", incomePerMin: 95, evolutionCondition: "level", evolutionLevel: 24, nextForm: "Hariyama" },
+                { name: "Azurill", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/298.gif", incomePerMin: 55, evolutionCondition: "level", evolutionLevel: 15, nextForm: "Marill" },
+                { name: "Skitty", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/300.gif", incomePerMin: 85, evolutionCondition: "item", itemNeeded: "pierreLune", nextForm: "Delcatty" },
+                { name: "Ténéfix", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/302.gif", incomePerMin: 100, evolutionCondition: null, nextForm: null },
+                { name: "Mysdibule", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/303.gif", incomePerMin: 100, evolutionCondition: null, nextForm: null },
+                { name: "Galekid", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/304.gif", incomePerMin: 100, evolutionCondition: "level", evolutionLevel: 32, nextForm: "Galegon" },
+                { name: "Méditikka", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/307.gif", incomePerMin: 95, evolutionCondition: "level", evolutionLevel: 37, nextForm: "Charmina" },
+                { name: "Dynavolt", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/309.gif", incomePerMin: 90, evolutionCondition: "level", evolutionLevel: 26, nextForm: "Élecsprint" },
+                { name: "Posipi", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/311.gif", incomePerMin: 100, evolutionCondition: null, nextForm: null },
+                { name: "Négapi", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/312.gif", incomePerMin: 100, evolutionCondition: null, nextForm: null },
+                { name: "Rosélia", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/315.gif", incomePerMin: 110, evolutionCondition: null, nextForm: null },
+                { name: "Gloupti", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/316.gif", incomePerMin: 90, evolutionCondition: "level", evolutionLevel: 26, nextForm: "Avaltout" },
+                { name: "Carvanha", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/318.gif", incomePerMin: 95, evolutionCondition: "level", evolutionLevel: 30, nextForm: "Sharpedo" },
+                { name: "Wailmer", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/320.gif", incomePerMin: 95, evolutionCondition: "level", evolutionLevel: 40, nextForm: "Wailord" }
+            ],
+
+            rare: [
+                { name: "Morphéo", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/351.gif", incomePerMin: 220, evolutionCondition: null, nextForm: null },
+                { name: "Kraknoix", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/328.gif", incomePerMin: 190, evolutionCondition: "level", evolutionLevel: 35, nextForm: "Vibraninf" },
+                { name: "Cacnea", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/331.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 32, nextForm: "Cacturne" },
+                { name: "Tylton", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/333.gif", incomePerMin: 200, evolutionCondition: "level", evolutionLevel: 35, nextForm: "Altaria" },
+                { name: "Mangriff", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/335.gif", incomePerMin: 240, evolutionCondition: null, nextForm: null },
+                { name: "Séviper", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/336.gif", incomePerMin: 240, evolutionCondition: null, nextForm: null },
+                { name: "Solaroc", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/337.gif", incomePerMin: 230, evolutionCondition: null, nextForm: null },
+                { name: "Séléroc", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/338.gif", incomePerMin: 230, evolutionCondition: null, nextForm: null },
+                { name: "Barloche", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/339.gif", incomePerMin: 170, evolutionCondition: "level", evolutionLevel: 30, nextForm: "Barbicha" },
+                { name: "Écrapince", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/341.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 30, nextForm: "Colhomard" },
+                { name: "Balbuto", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/343.gif", incomePerMin: 190, evolutionCondition: "level", evolutionLevel: 36, nextForm: "Kaorine" },
+                { name: "Lilia", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/345.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 40, nextForm: "Vacilys" },
+                { name: "Anorith", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/347.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 40, nextForm: "Armaldo" },
+                { name: "Barpau", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/349.gif", incomePerMin: 100, evolutionCondition: "level", evolutionLevel: 35, nextForm: "Milobellus" },
+                { name: "Polichombr", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/353.gif", incomePerMin: 190, evolutionCondition: "level", evolutionLevel: 37, nextForm: "Branette" },
+                { name: "Skelénox", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/355.gif", incomePerMin: 190, evolutionCondition: "level", evolutionLevel: 37, nextForm: "Téraclope" },
+                { name: "Tropius", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/357.gif", incomePerMin: 250, evolutionCondition: null, nextForm: null },
+                { name: "Éoko", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/358.gif", incomePerMin: 220, evolutionCondition: null, nextForm: null },
+                { name: "Absol", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/359.gif", incomePerMin: 280, evolutionCondition: null, nextForm: null },
+                { name: "Okéoké", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/360.gif", incomePerMin: 120, evolutionCondition: "level", evolutionLevel: 15, nextForm: "Qulbutoké" },
+                { name: "Stalgamin", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/361.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 42, nextForm: "Oniglali" },
+                { name: "Obalie", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/363.gif", incomePerMin: 180, evolutionCondition: "level", evolutionLevel: 32, nextForm: "Phogleur" },
+                { name: "Coquiperl", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/366.gif", incomePerMin: 200, evolutionCondition: "special", nextForm: null },
+                { name: "Relicanth", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/369.gif", incomePerMin: 260, evolutionCondition: null, nextForm: null },
+                { name: "Lovdisc", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/370.gif", incomePerMin: 180, evolutionCondition: null, nextForm: null },
+                { name: "Draby", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/371.gif", incomePerMin: 240, evolutionCondition: "level", evolutionLevel: 30, nextForm: "Drackhaus" },
+                { name: "Terhal", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/374.gif", incomePerMin: 250, evolutionCondition: "level", evolutionLevel: 20, nextForm: "Métang" }
+                            ],
+
+
+        }
     }
 };
