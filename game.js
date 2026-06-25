@@ -566,9 +566,9 @@ function switchZone(id, loc) {
 
 function createCard(m, loc) {
     let div = document.createElement("div");
-    let isLegendary = ["Artikodin", "Électhor", "Sulfura", "Mewtwo", "Mew", "Raikou", "Entei", "Suicune", "Lugia", "Ho-Oh", "Celebi"].includes(m.name);
     
-    // Correction : on utilise POKEDEX.kanto et POKEDEX.johto correctement
+    // Détection des types pour le style
+    let isLegendary = ["Artikodin", "Électhor", "Sulfura", "Mewtwo", "Mew", "Raikou", "Entei", "Suicune", "Lugia", "Ho-Oh", "Celebi"].includes(m.name);
     let isRare = m.incomePerMin >= 200 || 
                  (POKEDEX.kanto.rare.some(p => p.name === m.name)) || 
                  (POKEDEX.johto.rare.some(p => p.name === m.name));
@@ -578,32 +578,49 @@ function createCard(m, loc) {
     
     let isReadyForLevelEvo = (m.nextForm && !m.onExpedition && loc === 'team' && m.evolutionCondition === "level" && m.level >= m.evolutionLevel);
 
+    // Construction du contenu
+    let tick = calculateTickIncome(m);
+    let affichagePO = m.isBaby ? `⭐ +${tick} PO` : `+${tick} PO`;
+
+    // 1. Logique checkbox pour libération
+    let checkboxHTML = (multiReleaseMode && loc === 'reserve') ? 
+        `<input type="checkbox" class="release-checkbox" onclick="event.stopPropagation(); triggerCheckboxSelection('${m.id}', this.checked, this.parentElement.parentElement)" ${selectedForRelease.includes(m.id) ? 'checked' : ''} style="position:absolute; top:5px; left:5px;">` 
+        : "";
+
+    // 2. Construction du HTML avec image et infos
+    div.innerHTML = `
+        <div class="monster-image-container" style="position:relative;">
+            ${checkboxHTML}
+            <img src="${m.image}">
+        </div>
+        <div class="monster-info">
+            <div class="monster-name ${isReadyForLevelEvo ? 'gold-evo-text' : ''}">${m.name}</div>
+            <div class="monster-xp">Lvl ${m.level}</div>
+            <div class="monster-income">${affichagePO}</div>
+        </div>
+    `;
+
+    // 3. Gestion du clic
     div.onclick = (e) => {
-        if (e.target.tagName === "BUTTON" || e.target.tagName === "INPUT") return;
+        // Si on coche la case, on ne veut pas déclencher le switchZone
+        if (e.target.tagName === "INPUT") return;
+
         if (itemSelectionneActuel !== null && loc === 'reserve') {
             let reserveIdx = gameState.reserve.findIndex(p => p.id === m.id);
             if (reserveIdx !== -1) { appliquerObjetAuPokemon(reserveIdx, itemSelectionneActuel); return; }
         }
-        if (loc === 'reserve' && multiReleaseMode) {
-            let checkbox = div.querySelector(".release-checkbox");
-            if (checkbox) { checkbox.checked = !checkbox.checked; triggerCheckboxSelection(m.id, checkbox.checked, div); }
-        } else if (loc === 'reserve') {
-            switchZone(m.id, loc);
-        } else if (isReadyForLevelEvo) { 
+        
+        if (isReadyForLevelEvo) { 
             evolveMonster(m.id); 
-        } else { 
-            switchZone(m.id, loc); 
+        } else if (!multiReleaseMode) {
+            // Le clic normal déplace le Pokémon
+            switchZone(m.id, loc);
         }
     };
 
-    let tick = calculateTickIncome(m);
-    let affichagePO = m.isBaby ? `⭐ +${tick} PO` : `+${tick} PO`;
-
-    div.innerHTML = `<div class="monster-image-container"><img src="${m.image}"></div><div class="monster-info"><div class="monster-name ${isReadyForLevelEvo ? 'gold-evo-text' : ''}">${m.name}</div><div class="monster-xp">Lvl ${m.level}</div><div class="monster-income">${affichagePO}</div></div>`;
-
-    // ... (garde le reste de ta fonction pour les boutons d'évolution comme avant)
     return div;
 }
+
 function triggerCheckboxSelection(id, checked, cardElement) {
     if (checked) { if (!selectedForRelease.includes(id)) selectedForRelease.push(id); cardElement.style.backgroundColor = "rgba(239, 68, 68, 0.3)"; }
     else { selectedForRelease = selectedForRelease.filter(sid => sid !== id); cardElement.style.backgroundColor = ""; }
