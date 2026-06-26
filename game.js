@@ -20,13 +20,17 @@ let gameState = {
     lastSaveTime: Date.now()
 };
 
+// --- FONCTION DE SÉCURITÉ ---
+function getSafeIncome(m) {
+    let income = parseFloat(m.incomePerMin);
+    return isNaN(income) ? 10 : income; 
+}
+
 let multiReleaseMode = false;
 let selectedForRelease = [];
 let combatInterval = null;
 let itemSelectionneActuel = null;
 let slotEnCoursDeSelection = null;
-
-
 
 
 function showNotification(text) {
@@ -70,27 +74,58 @@ function selectionnerObjetPourAction(itemId) {
 }
 
 function appliquerObjetAuPokemon(reserveIndex, itemId) {
-    let p = gameState.reserve[reserveIndex]; let config = ITEMS_CONFIG[itemId];
+    let p = gameState.reserve[reserveIndex]; 
+    let config = ITEMS_CONFIG[itemId];
+    
     if (!p || !config || gameState.items[itemId] <= 0) return;
 
+    // 1. GESTION BONBONS
     if (config.type === "candy") {
-        p.incomePerMin = Math.round(p.incomePerMin * config.multiplier); gameState.items[itemId]--;
-        showNotification(`🍬 ${p.name} mange un ${config.name} ! Ses bénéfices augmentent !`);
-    }
-    else if (config.type === "evolution") {
-        if (p.name === "Évoli" || p.evolutionCondition === "special_eevee") {
-            if (itemId === "pierreEau" || itemId === "pierreFeu" || itemId === "pierreFoudre") {
-                gameState.items[itemId]--;
-                let targetName = (itemId === "pierreEau") ? "Aquali" : (itemId === "pierreFeu") ? "Pyroli" : "Voltali";
-                let evoData = POKEDEX.kanto.evolutions[targetName];
-                if (evoData) {
-                    p.name = evoData.name; p.image = evoData.image;
-                    p.incomePerMin = p.isBaby ? Math.floor(evoData.incomePerMin * 1.25) : evoData.incomePerMin;
-                    p.evolutionCondition = null; p.nextForm = null; p.itemNeeded = null; p.evolutionLevel = null;
-                    discoverPokemon(evoData.name); showNotification(`✨ Évoli évolue en ${p.name} !`);
-                }
-            } else { showNotification("Cette pierre n'a aucun effet sur Évoli."); }
+        if (p.bonbonsUtilises === undefined) p.bonbonsUtilises = 0;
+        if (p.bonbonsUtilises >= 2) {
+            showNotification(`❌ ${p.name} a déjà mangé 2 bonbons !`);
+            itemSelectionneActuel = null;
+            return;
         }
+
+        p.incomePerMin = Math.round(p.incomePerMin * config.multiplier); 
+        gameState.items[itemId]--;
+        p.bonbonsUtilises++;
+        showNotification(`🍬 ${p.name} mange un ${config.name} (${p.bonbonsUtilises}/2) ! Ses bénéfices augmentent !`);
+    }
+    // 2. GESTION ÉVOLUTIONS (Évoli + Autres)
+    else if (config.type === "evolution") {
+        // Bloc Évoli
+        if (p.name === "Évoli" || p.evolutionCondition === "special_eevee") {
+            if (["pierreEau", "pierreFeu", "pierreFoudre", "pierreLune", "pierreSoleil"].includes(itemId)) {
+                let targetName = "";
+                if (itemId === "pierreEau") targetName = "Aquali";
+                else if (itemId === "pierreFeu") targetName = "Pyroli";
+                else if (itemId === "pierreFoudre") targetName = "Voltali";
+                else if (itemId === "pierreLune") targetName = "Noctali";
+                else if (itemId === "pierreSoleil") targetName = "Mentali";
+
+                let evoData = POKEDEX.kanto.evolutions[targetName] || POKEDEX.johto.evolutions[targetName];
+                
+                if (evoData) {
+                    gameState.items[itemId]--;
+                    p.name = evoData.name; 
+                    p.image = evoData.image;
+                    p.incomePerMin = p.isBaby ? Math.floor(evoData.incomePerMin * 1.25) : evoData.incomePerMin;
+                    p.evolutionCondition = null; 
+                    p.nextForm = null; 
+                    p.itemNeeded = null; 
+                    p.evolutionLevel = null;
+                    discoverPokemon(evoData.name); 
+                    showNotification(`✨ Évoli évolue en ${p.name} !`);
+                } else {
+                    showNotification("Erreur : Évolution introuvable pour " + targetName);
+                }
+            } else { 
+                showNotification("Cette pierre n'a aucun effet sur Évoli."); 
+            }
+        }
+        // Bloc autres évolutions
         else {
             let localEvoConfig = POKEDEX.kanto.evolutions[p.name] || POKEDEX.johto.evolutions[p.name];
             if (localEvoConfig && localEvoConfig.evolutionCondition === "item" && localEvoConfig.itemNeeded === itemId) {
@@ -104,20 +139,15 @@ function appliquerObjetAuPokemon(reserveIndex, itemId) {
                     p.itemNeeded = evoData.itemNeeded || null; p.evolutionLevel = evoData.evolutionLevel || null;
                     discoverPokemon(evoData.name); showNotification(`✨ Évolution réussie en ${p.name} !`);
                 }
-            } else if (p.evolutionCondition === "item" && p.itemNeeded === itemId) {
-                let evoData = POKEDEX.kanto.evolutions[p.nextForm] || POKEDEX.johto.evolutions[p.nextForm];
-                if (evoData) {
-                    gameState.items[itemId]--;
-                    p.name = evoData.name; p.image = evoData.image;
-                    p.incomePerMin = p.isBaby ? Math.floor(evoData.incomePerMin * 1.25) : evoData.incomePerMin;
-                    p.evolutionCondition = evoData.evolutionCondition || null; p.nextForm = evoData.nextForm || null;
-                    p.itemNeeded = evoData.itemNeeded || null; p.evolutionLevel = evoData.evolutionLevel || null;
-                    discoverPokemon(evoData.name); showNotification(`✨ Évolution réussie en ${p.name} !`);
-                }
-            } else { showNotification("Cet objet n'a aucun effet sur ce Pokémon."); }
+            } else { 
+                showNotification("Cet objet n'a aucun effet sur ce Pokémon."); 
+            }
         }
     }
-    itemSelectionneActuel = null; saveGame(); updateUI();
+    
+    itemSelectionneActuel = null; 
+    saveGame(); 
+    updateUI();
 }
 
 function ouvrirSelectionPension(slotIndex) {
@@ -178,7 +208,6 @@ function validerChoixPension(reserveIndex) {
 }
 
 function retirerDePension(slotIndex) {
-    // Vérification : Bloque le retrait si une incubation est active
     if (gameState.activeEggIncubation) {
         showNotification("⚠️ Impossible de retirer un parent tant que l'incubation est en cours !");
         return;
@@ -222,42 +251,95 @@ function lancerIncubation() {
 function recupererOeuf() {
     if (!gameState.activeEggIncubation || gameState.activeEggIncubation.progress < 50000) return;
 
-    // 1. Identifier quel parent n'est PAS Métamorph
     let parent1 = gameState.pension[0];
     let parent2 = gameState.pension[1];
     
-    // Si parent1 est Métamorph, on prend parent2, sinon on prend parent1
+    // Le parent cible est celui qui n'est pas Métamorph
     let parentCible = (parent1.name === "Métamorph") ? parent2 : parent1;
     
-    // 2. Création du bébé
-    let bebe = { 
-        id: Date.now() + Math.random(), 
-        name: parentCible.name, 
-        image: parentCible.image, 
-        level: 1, 
-        // Bonus de 25% sur l'income comme tu le souhaitais
-        incomePerMin: Math.floor(parentCible.incomePerMin * 1.25), 
-        onExpedition: false,
-        isBaby: true // <--- IMPORTANT : Active le cadre rose
-    };
+    // 1. Gérer manuellement la famille d'Évoli (car ses évolutions sont multiples)
+    const eeveelutions = ["Aquali", "Pyroli", "Voltali", "Mentali", "Noctali", "Phyllali", "Givrali", "Nymphali"];
+    let nomCible = eeveelutions.includes(parentCible.name) ? "Évoli" : parentCible.name;
 
-    gameState.reserve.push(bebe);
+    // 2. Rassembler tous les Pokémon de base et toutes les évolutions du jeu
+    let toutesLesBases = [];
+    let toutesLesEvolutions = {};
+
+    Object.keys(POKEDEX).forEach(region => {
+        if (POKEDEX[region].commun) toutesLesBases.push(...POKEDEX[region].commun);
+        if (POKEDEX[region].rare) toutesLesBases.push(...POKEDEX[region].rare);
+        if (POKEDEX[region].evolutions) Object.assign(toutesLesEvolutions, POKEDEX[region].evolutions);
+    });
+
+    // 3. Est-ce que la cible est DÉJÀ un Pokémon de base ? (ex: Salamèche, Roucool)
+    let baseTrouvee = toutesLesBases.find(p => p.name === nomCible);
+
+    // 4. Sinon, on remonte la chaîne d'évolution ! (ex: Dracaufeu -> Reptincel -> Salamèche)
+    if (!baseTrouvee) {
+        for (let base of toutesLesBases) {
+            let currentNext = base.nextForm;
+            
+            while (currentNext) {
+                if (currentNext === nomCible) {
+                    baseTrouvee = base; // On a trouvé la base d'origine !
+                    break;
+                }
+                // S'il y a une évolution suivante, on continue de chercher
+                let evoInfo = toutesLesEvolutions[currentNext];
+                currentNext = evoInfo ? evoInfo.nextForm : null;
+            }
+            if (baseTrouvee) break; // Arrêter de chercher si on a trouvé
+        }
+    }
+
+    // 5. Sécurité : Si on ne trouve rien (ex: Légendaire ou bug), on clone la cible
+    if (!baseTrouvee) baseTrouvee = toutesLesEvolutions[nomCible];
+    if (!baseTrouvee && typeof POKEDEX_LIST !== 'undefined') baseTrouvee = POKEDEX_LIST.find(p => p.name === nomCible);
+    
+    if (!baseTrouvee) {
+        showNotification("Erreur lors de l'éclosion... Annulation pour débloquer la pension.");
+        gameState.activeEggIncubation = null; 
+        updateUI();
+        return; 
+    }
+
+    // 6. On crée le bébé à partir du POKÉMON DE BASE (avec bordure spéciale si gérée)
+    let nouveauPokemon = {
+        id: Date.now() + Math.random(), 
+        name: baseTrouvee.name, 
+        image: baseTrouvee.image, 
+        level: 1, 
+        xp: 0, 
+        xpNeeded: 100, 
+        incomePerMin: generateRandomStats(baseTrouvee.incomePerMin),
+        onExpedition: false,
+        nextForm: baseTrouvee.nextForm || null,
+        evolutionCondition: baseTrouvee.evolutionCondition || null,
+        itemNeeded: baseTrouvee.itemNeeded || null,
+        evolutionLevel: baseTrouvee.evolutionLevel || null,
+        isBaby: true 
+    };
+    
+    // On ajoute le bébé à la réserve et on vide l'incubateur
+    gameState.reserve.push(nouveauPokemon);
     gameState.activeEggIncubation = null; 
     
-    showNotification(`🐣 Félicitations ! L'œuf a éclos en un bébé ${bebe.name} !`);
+    showNotification(`🐣 Félicitations ! L'œuf de ${parentCible.name} a éclos en ${nouveauPokemon.name} !`);
     
-    discoverPokemon(bebe.name); 
     sortReserveByID(); 
     saveGame(); 
     updateUI();
 }
+
 function generateRandomStats(baseValue) {
     let randomMod = Math.random() * (1.20 - 0.85) + 0.85;
     return Math.floor(baseValue * randomMod);
 }
 
 function calculateTickIncome(m) {
-    let lvlBonus = (m.level - 1) * 2; return Math.floor((m.incomePerMin + lvlBonus) / 6);
+    let lvlBonus = (m.level - 1) * 2; 
+    // Utilisation de getSafeIncome pour éviter les NaN
+    return Math.floor((getSafeIncome(m) + lvlBonus) / 6);
 }
 
 function sortReserveByID() {
@@ -306,29 +388,52 @@ function discoverPokemon(name) {
 function buyEgg(region) {
     if (!region) region = 'kanto';
 
-    if (region === 'johto') {
-        if (!gameState.unlockedAchievements.includes("leg_mewtwo")) {
-            showNotification("🔒 Boutique Johto bloquée ! Réclamez d'abord le succès Mewtwo."); return;
-        }
+    const requirements = { johto: "leg_mewtwo", hoenn: "leg_kyogre", sinnoh: "leg_dialga", unys: "leg_reshiram" };
+    if (requirements[region] && !gameState.unlockedAchievements.includes(requirements[region])) {
+        showNotification(`🔒 Boutique ${region.toUpperCase()} bloquée !`); 
+        return;
     }
 
-    let cost = (region === 'johto') ? 8000 : 5000;
+    const costs = { kanto: 5000, johto: 8000, hoenn: 12000, sinnoh: 15000, unys: 20000 };
+    let cost = costs[region] || 5000;
 
     if (gameState.money >= cost) {
         gameState.money -= cost;
+
         let pool = [...POKEDEX[region].commun, ...POKEDEX[region].rare];
         let rolled = pool[Math.floor(Math.random() * pool.length)];
+        
         let finalIncome = generateRandomStats(rolled.incomePerMin);
 
         let p = {
-            id: Date.now() + Math.random(), name: rolled.name, image: rolled.image, nextForm: rolled.nextForm || null,
-            level: 1, xp: 0, xpNeeded: 100, incomePerMin: finalIncome, evolutionCondition: rolled.evolutionCondition || null,
-            itemNeeded: rolled.itemNeeded || null, evolutionLevel: rolled.evolutionLevel || null, onExpedition: false
+            id: Date.now() + Math.random(), 
+            name: rolled.name, 
+            image: rolled.image, 
+            nextForm: rolled.nextForm || null,
+            level: 1, 
+            xp: 0, 
+            xpNeeded: 100, 
+            incomePerMin: finalIncome, 
+            evolutionCondition: rolled.evolutionCondition || null,
+            itemNeeded: rolled.itemNeeded || null, 
+            evolutionLevel: rolled.evolutionLevel || null, 
+            onExpedition: false
         };
-        if (gameState.activeTeam.length < 6) gameState.activeTeam.push(p); else gameState.reserve.push(p);
+
+        if (gameState.activeTeam.length < 6) {
+            gameState.activeTeam.push(p); 
+        } else {
+            gameState.reserve.push(p);
+        }
+
         showNotification(`🥚 Boutique : Un œuf éclot en un magnifique ${p.name} !`);
-        discoverPokemon(p.name); sortReserveByID(); saveGame(); updateUI();
-    } else { showNotification("Pas assez d'argent !"); }
+        discoverPokemon(p.name); 
+        sortReserveByID(); 
+        saveGame(); 
+        updateUI();
+    } else { 
+        showNotification("Pas assez d'argent !"); 
+    }
 }
 
 function saveGame() { gameState.lastSaveTime = Date.now(); localStorage.setItem("pokemonBreeder_save", JSON.stringify(gameState)); }
@@ -352,18 +457,22 @@ function processOfflineProgress() {
     if (totalTicks > 0) {
         let earnedMoney = 0;
         gameState.activeTeam.forEach(m => {
-            // L'XP est gagnée pour tous les Pokémon même en hors-ligne
             m.xp += 25 * totalTicks; while (m.xp >= m.xpNeeded) { m.xp -= m.xpNeeded; m.level++; m.xpNeeded = m.level * 100; }
-            
-            // L'argent seulement pour ceux au ranch
             if (!m.onExpedition) {
                 earnedMoney += (calculateTickIncome(m) * totalTicks) * 0.20;
             }
         });
-        if (earnedMoney > 0) { gameState.money += earnedMoney; showNotification(`💤 Retour ! +${Math.floor(earnedMoney)} PO.`); }
+        if (earnedMoney > 0) { 
+            gameState.money += earnedMoney; 
+            // --- NOUVELLE LIMITE ICI ---
+            if (gameState.money > 9999999) gameState.money = 9999999; 
+            
+            showNotification(`💤 Retour ! +${Math.floor(earnedMoney)} PO.`); 
+        }
     }
     gameState.lastSaveTime = now; saveGame();
 }
+
 
 function loadGame() {
     let data = localStorage.getItem("pokemonBreeder_save");
@@ -375,10 +484,22 @@ function loadGame() {
             if (gameState.eggProgressMoney === undefined) gameState.eggProgressMoney = 0;
             const objetsAttendus = ["pierreEau", "pierreFeu", "pierreFoudre", "pierreLune", "pierrePlante", "pierreSoleil", "peauMetal", "rocheRoyale", "ecailleDraco", "bonbonSimple", "bonbonSuper", "bonbonMax"];
             objetsAttendus.forEach(o => { if (gameState.items[o] === undefined) gameState.items[o] = 0; });
-            if (!gameState.discoveredPokemon) gameState.discoveredPokemon = []; if (!gameState.claimedCodes) gameState.claimedCodes = [];
+            if (!gameState.discoveredPokemon) gameState.discoveredPokemon = []; 
+            if (!gameState.claimedCodes) gameState.claimedCodes = [];
             if (!gameState.unlockedAchievements) gameState.unlockedAchievements = [];
             if (!gameState.earnedAchievements) gameState.earnedAchievements = [];
             if (!gameState.areneCooldowns) gameState.areneCooldowns = {};
+
+            const repairPokemon = (m) => {
+                if (m && m.xp === undefined) m.xp = 0;
+                if (m && m.xpNeeded === undefined) m.xpNeeded = m.level ? m.level * 100 : 100;
+            };
+            
+            if (gameState.activeTeam) gameState.activeTeam.forEach(repairPokemon);
+            if (gameState.reserve) gameState.reserve.forEach(repairPokemon);
+            if (gameState.pension[0]) repairPokemon(gameState.pension[0]);
+            if (gameState.pension[1]) repairPokemon(gameState.pension[1]);
+
         } catch (e) { localStorage.removeItem("pokemonBreeder_save"); }
     }
     checkStarterOffer(); sortReserveByID(); processOfflineProgress();
@@ -386,14 +507,22 @@ function loadGame() {
 
 function hardResetGame() { if (confirm("🚨 Supprimer définitivement votre sauvegarde ?")) { localStorage.removeItem("pokemonBreeder_save"); location.reload(); } }
 
-
 function toggleMultiReleaseMode() { multiReleaseMode = !multiReleaseMode; selectedForRelease = []; updateUI(); }
 
 function confirmMultiRelease() {
-    if (selectedForRelease.length === 0) { toggleMultiReleaseMode(); return; }
-    if (confirm(`🗑️ Relâcher ces ${selectedForRelease.length} Pokémon ?`)) {
+    if (selectedForRelease.length === 0) {
+        showNotification("Aucun Pokémon sélectionné pour la libération !");
+        toggleMultiReleaseMode(); 
+        return;
+    }
+
+    if (confirm(`🗑️ Êtes-vous sûr de vouloir relâcher ces ${selectedForRelease.length} Pokémon ?`)) {
         gameState.reserve = gameState.reserve.filter(m => !selectedForRelease.includes(m.id));
-        selectedForRelease = []; multiReleaseMode = false; saveGame(); updateUI();
+        selectedForRelease = [];
+        multiReleaseMode = false;
+        showNotification("Pokémon libérés avec succès !");
+        saveGame();
+        updateUI();
     }
 }
 
@@ -412,38 +541,94 @@ function useEvolutionItem(id) {
 }
 
 function triggerEeveeEvolution(id, item) {
-    let idx = gameState.activeTeam.findIndex(m => m.id === id); if (idx === -1 || gameState.activeTeam[idx].onExpedition) return;
-    if (gameState.items[item] <= 0) { showNotification("Tu n'as pas cette pierre !"); return; }
+    let idx = gameState.activeTeam.findIndex(m => m.id === id); 
+    if (idx === -1 || gameState.activeTeam[idx].onExpedition) return;
+    
+    // Vérification de la possession de l'objet
+    if (gameState.items[item] <= 0) { 
+        showNotification("Tu n'as pas cet objet !"); 
+        return; 
+    }
 
-    gameState.items[item]--;
-    let name = (item === "pierreEau") ? "Aquali" : (item === "pierreFeu") ? "Pyroli" : "Voltali";
-    let config = POKEDEX.kanto.evolutions[name]; let m = gameState.activeTeam[idx]; let potentialRatio = m.incomePerMin / 240;
+    // Définition de la cible selon la pierre
+    let name = "";
+    if (item === "pierreEau") name = "Aquali";
+    else if (item === "pierreFeu") name = "Pyroli";
+    else if (item === "pierreFoudre") name = "Voltali";
+    else if (item === "pierreLune") name = "Noctali";
+    else if (item === "pierreSoleil") name = "Mentali";
+    else {
+        showNotification("Cet objet ne fonctionne pas sur Évoli.");
+        return;
+    }
 
-    m.name = config.name; m.image = config.image; m.incomePerMin = Math.floor(config.incomePerMin * potentialRatio);
-    m.evolutionCondition = null; m.nextForm = null; m.evolutionLevel = null; m.itemNeeded = null;
-    discoverPokemon(config.name); saveGame(); updateUI();
+    // Récupération de la configuration avec vérification de sécurité
+    let config = (POKEDEX.kanto.evolutions && POKEDEX.kanto.evolutions[name]) || 
+                 (POKEDEX.johto.evolutions && POKEDEX.johto.evolutions[name]);
+
+    if (!config) {
+        showNotification("Erreur : Configuration d'évolution manquante pour " + name);
+        return;
+    }
+
+    let m = gameState.activeTeam[idx]; 
+    
+    // Calcul du ratio de puissance (basé sur la base d'Évoli qui est 240)
+    let potentialRatio = m.incomePerMin / 240;
+
+    gameState.items[item]--; // On consomme l'objet
+
+    // Application de l'évolution
+    m.name = config.name; 
+    m.image = config.image; 
+    m.incomePerMin = Math.floor(config.incomePerMin * potentialRatio);
+    
+    // Nettoyage des conditions d'évolution
+    m.evolutionCondition = null; 
+    m.nextForm = null; 
+    m.evolutionLevel = null; 
+    m.itemNeeded = null;
+    
+    discoverPokemon(config.name); 
+    saveGame(); 
+    updateUI();
+    showNotification(`✨ Évoli a évolué en ${m.name} !`);
 }
 
-function updateJohtoButtonVisuals() {
-    let buttons = document.querySelectorAll("#tab-oeufs button, .zone-card button, button");
-    let targetBtn = null;
-    buttons.forEach(btn => {
-        let attr = btn.getAttribute("onclick");
-        if (attr && attr.includes("'johto'")) { targetBtn = btn; }
-    });
 
-    if (targetBtn) {
-        let mewtwoReclame = gameState.unlockedAchievements.includes("leg_mewtwo");
-        if (!mewtwoReclame) {
-            targetBtn.style.opacity = "0.4"; targetBtn.style.cursor = "not-allowed";
-            targetBtn.style.background = "#334155"; targetBtn.style.border = "1px solid #475569";
-            targetBtn.innerText = "🔒 BLOQUÉ (Requis: Mewtwo)";
+// REMPLACE `updateJohtoButtonVisuals` ET `updateRegionButtons` :
+// Cette fonction harmonise l'affichage de Johto, Hoenn, Sinnoh et Unys
+function updateBoutiquesVisuals() {
+    const boutiques = {
+        'johto': { leg: 'leg_mewtwo', name: 'Mewtwo', defaultText: 'ACHETER (8000 PO)', color: '#2563eb' },
+        'hoenn': { leg: 'leg_kyogre', name: 'Kyogre', defaultText: 'ACHETER (12000 PO)', color: '#059669' },
+        'sinnoh': { leg: 'leg_dialga', name: 'Dialga', defaultText: 'ACHETER (15000 PO)', color: '#7c3aed' },
+        'unys': { leg: 'leg_reshiram', name: 'Reshiram', defaultText: 'ACHETER (20000 PO)', color: '#db2777' }
+    };
+
+    Object.keys(boutiques).forEach(region => {
+        let btn = document.getElementById(`btn-buy-${region}`);
+        if (!btn) return;
+        
+        let data = boutiques[region];
+        let estDebloque = gameState.unlockedAchievements.includes(data.leg);
+
+        if (!estDebloque) {
+            btn.style.opacity = "0.4";
+            btn.style.cursor = "not-allowed";
+            btn.style.background = "#334155";
+            btn.style.border = "1px solid #475569";
+            btn.innerText = `🔒 BLOQUÉ (Requis: ${data.name})`;
+            btn.disabled = true;
         } else {
-            targetBtn.style.opacity = "1"; targetBtn.style.cursor = "pointer";
-            targetBtn.style.background = ""; targetBtn.style.border = "";
-            targetBtn.innerText = "ACHETER (8000 PO)";
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
+            btn.style.background = data.color;
+            btn.style.border = "none";
+            btn.innerText = data.defaultText;
+            btn.disabled = false;
         }
-    }
+    });
 }
 
 function evolveMonster(id) {
@@ -468,7 +653,6 @@ function startExpedition(id) {
     saveGame(); updateUI();
 }
 
-// game.js
 function checkExpeditionEnd() {
     if (gameState.activeExpedition && Date.now() >= gameState.activeExpedition.endTime) {
         gameState.activeTeam.forEach(m => m.onExpedition = false); 
@@ -495,6 +679,7 @@ function checkExpeditionEnd() {
         saveGame(); updateUI();
     }
 }
+
 function initAreneUI() {
     let container = document.getElementById("arene-selection"); if (!container) return;
     container.innerHTML = ""; if (!gameState.areneCooldowns) gameState.areneCooldowns = {};
@@ -513,7 +698,6 @@ function initAreneUI() {
     });
 }
 
-// --- NOUVELLES RÉCOMPENSES D'ARÈNE ---
 function startCombat(id) {
     if (combatInterval) clearInterval(combatInterval); if (gameState.activeTeam.length === 0) { showNotification("Ton enclos est vide !"); return; }
     let boss = CHAMPIONS.find(c => c.id === id);
@@ -529,18 +713,20 @@ function startCombat(id) {
         bHp -= playerAtk; pHp -= boss.atk;
         document.getElementById("player-hp").innerText = Math.max(0, pHp); document.getElementById("boss-hp").innerText = Math.max(0, bHp);
 
-        if (bHp <= 0) {
+      if (bHp <= 0) {
             clearInterval(combatInterval); combatInterval = null;
             gameState.areneCooldowns[boss.id] = Date.now();
 
-            // Les nouvelles récompenses
             gameState.money += boss.rewardMoney;
+            // --- NOUVELLE LIMITE ICI ---
+            if (gameState.money > 9999999) gameState.money = 9999999;
+
             gameState.items[boss.rewardStone]++;
             gameState.items.bonbonMax++;
 
-            showNotification(`🎉 VICTOIRE ! +10000 PO, +1 ${ITEMS_CONFIG[boss.rewardStone].name}, et +1 Bonbon Max !`);
+            showNotification(`🎉 VICTOIRE ! +${boss.rewardMoney} PO, +1 ${ITEMS_CONFIG[boss.rewardStone].name}, et +1 Bonbon Max !`);
             endCombat();
-        } else if (pHp <= 0) {
+        }else if (pHp <= 0) {
             clearInterval(combatInterval); combatInterval = null;
             showNotification(`❌ Défaite... Votre équipe doit monter en niveau.`);
             endCombat();
@@ -567,7 +753,6 @@ function switchZone(id, loc) {
 function createCard(m, loc) {
     let div = document.createElement("div");
     
-    // Détection des types pour le style
     let isLegendary = ["Artikodin", "Électhor", "Sulfura", "Mewtwo", "Mew", "Raikou", "Entei", "Suicune", "Lugia", "Ho-Oh", "Celebi"].includes(m.name);
     let isRare = m.incomePerMin >= 200 || 
                  (POKEDEX.kanto.rare.some(p => p.name === m.name)) || 
@@ -576,22 +761,24 @@ function createCard(m, loc) {
     let babyClass = m.isBaby ? 'baby-border' : '';
     div.className = `monster-card ${m.onExpedition ? 'on-expedition' : ''} ${isLegendary ? 'legend-border' : isRare ? 'rare-border' : ''} ${babyClass}`;
     
+    let isSelected = selectedForRelease.includes(m.id);
+    if (multiReleaseMode && loc === 'reserve' && isSelected) {
+        div.style.backgroundColor = "rgba(239, 68, 68, 0.3)";
+    }
+
     let isReadyForLevelEvo = (m.nextForm && !m.onExpedition && loc === 'team' && m.evolutionCondition === "level" && m.level >= m.evolutionLevel);
 
-    // Construction du contenu
     let tick = calculateTickIncome(m);
     let affichagePO = m.isBaby ? `⭐ +${tick} PO` : `+${tick} PO`;
 
-    // 1. Logique checkbox pour libération
     let checkboxHTML = (multiReleaseMode && loc === 'reserve') ? 
-        `<input type="checkbox" class="release-checkbox" onclick="event.stopPropagation(); triggerCheckboxSelection('${m.id}', this.checked, this.parentElement.parentElement)" ${selectedForRelease.includes(m.id) ? 'checked' : ''} style="position:absolute; top:5px; left:5px;">` 
+        `<input type="checkbox" class="release-checkbox" ${isSelected ? 'checked' : ''} style="position:absolute; top:5px; left:5px; pointer-events:none;">` 
         : "";
 
-    // 2. Construction du HTML avec image et infos
     div.innerHTML = `
         <div class="monster-image-container" style="position:relative;">
             ${checkboxHTML}
-            <img src="${m.image}">
+            <img src="${m.image}" draggable="false">
         </div>
         <div class="monster-info">
             <div class="monster-name ${isReadyForLevelEvo ? 'gold-evo-text' : ''}">${m.name}</div>
@@ -600,10 +787,15 @@ function createCard(m, loc) {
         </div>
     `;
 
-    // 3. Gestion du clic
     div.onclick = (e) => {
-        // Si on coche la case, on ne veut pas déclencher le switchZone
-        if (e.target.tagName === "INPUT") return;
+        if (multiReleaseMode && loc === 'reserve') {
+            let cb = div.querySelector('.release-checkbox');
+            if (cb) {
+                cb.checked = !cb.checked; 
+                triggerCheckboxSelection(m.id, cb.checked, div);
+            }
+            return; 
+        }
 
         if (itemSelectionneActuel !== null && loc === 'reserve') {
             let reserveIdx = gameState.reserve.findIndex(p => p.id === m.id);
@@ -612,8 +804,7 @@ function createCard(m, loc) {
         
         if (isReadyForLevelEvo) { 
             evolveMonster(m.id); 
-        } else if (!multiReleaseMode) {
-            // Le clic normal déplace le Pokémon
+        } else {
             switchZone(m.id, loc);
         }
     };
@@ -657,14 +848,38 @@ function updateUI() {
     let stockTab = document.getElementById("tab-stock");
     if (stockTab) {
         let actionBox = document.getElementById("multi-release-actions");
-        if (!actionBox) { actionBox = document.createElement("div"); actionBox.id = "multi-release-actions"; actionBox.style.cssText = "display:flex; gap:10px; margin-bottom:8px;"; stockTab.insertBefore(actionBox, stockTab.firstChild); }
-        actionBox.innerHTML = "";
+        if (!actionBox) { 
+            actionBox = document.createElement("div"); 
+            actionBox.id = "multi-release-actions"; 
+            actionBox.style.cssText = "display:flex; gap:10px; margin-bottom:8px; justify-content:center;"; 
+            stockTab.insertBefore(actionBox, stockTab.firstChild); 
+        }
+        
+        actionBox.innerHTML = ""; 
+
         if (!multiReleaseMode) {
-            let btn = document.createElement("button"); btn.className = "zone-btn"; btn.style.padding = "6px 12px"; btn.innerText = "🗑️ MODE LIBÉRATION"; btn.onclick = toggleMultiReleaseMode; actionBox.appendChild(btn);
+            let btn = document.createElement("button"); 
+            btn.className = "zone-btn"; 
+            btn.style.padding = "6px 12px"; 
+            btn.innerText = "🗑️ MODE LIBÉRATION"; 
+            btn.onclick = toggleMultiReleaseMode; 
+            actionBox.appendChild(btn);
         } else {
-            let bC = document.createElement("button"); bC.id = "confirm-release-btn"; bC.className = "champion-btn"; bC.style.padding = "6px 12px"; bC.innerText = "ANNULER"; bC.onclick = confirmMultiRelease;
-            let bR = document.createElement("button"); bR.className = "zone-btn"; bR.style.cssText = "padding:6px 12px; background:#4a5568; color:white;"; bR.innerText = "RETOUR"; bR.onclick = toggleMultiReleaseMode;
-            actionBox.appendChild(bC); actionBox.appendChild(bR);
+            let bC = document.createElement("button"); 
+            bC.id = "confirm-release-btn"; 
+            bC.className = "champion-btn"; 
+            bC.style.padding = "6px 12px"; 
+            bC.innerText = selectedForRelease.length > 0 ? `CONFIRMER (${selectedForRelease.length})` : "ANNULER";
+            bC.onclick = confirmMultiRelease;
+            
+            let bR = document.createElement("button"); 
+            bR.className = "zone-btn"; 
+            bR.style.cssText = "padding:6px 12px; background:#4a5568; color:white;"; 
+            bR.innerText = "RETOUR"; 
+            bR.onclick = toggleMultiReleaseMode; 
+            
+            actionBox.appendChild(bC); 
+            actionBox.appendChild(bR);
         }
     }
 
@@ -763,7 +978,8 @@ function updateUI() {
         }
     }
 
-    updateJohtoButtonVisuals();
+    // Mise à jour de tous les boutons de la boutique d'oeufs !
+    updateBoutiquesVisuals();
 }
 
 loadGame();
@@ -779,7 +995,6 @@ window.onload = function () {
         });
     }
 
-    // Timer des expéditions
     setInterval(() => {
         if (gameState.activeExpedition) {
             let rem = Math.ceil((gameState.activeExpedition.endTime - Date.now()) / 1000);
@@ -790,12 +1005,10 @@ window.onload = function () {
         }
     }, 1000);
 
-    // Tick de revenus et progression XP
     setInterval(() => {
         let gainsDuTick = 0;
         
         gameState.activeTeam.forEach(m => {
-            // 1. L'XP augmente TOUJOURS, même si le Pokémon est en expédition
             m.xp += 25;
             while (m.xp >= m.xpNeeded) { 
                 m.xp -= m.xpNeeded; 
@@ -803,14 +1016,18 @@ window.onload = function () {
                 m.xpNeeded = m.level * 100; 
             }
             
-            // 2. L'argent n'est généré que si le Pokémon n'est pas en expédition
             if (!m.onExpedition) {
                 gainsDuTick += calculateTickIncome(m);
             }
         });
 
-        // 3. Application des gains
+        // On ajoute les gains du tick à l'argent total
         gameState.money += gainsDuTick;
+
+        // ---> LA LIMITE S'AJOUTE JUSTE ICI <---
+        if (gameState.money > 9999999) {
+            gameState.money = 9999999;
+        }
 
         if (gameState.activeEggIncubation) {
             gameState.activeEggIncubation.progress += gainsDuTick;

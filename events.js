@@ -52,6 +52,51 @@ const ACHIEVEMENTS_CONFIG = [
     check: () => gameState.discoveredPokemon.length >= 250,
     monster: { name: "Ho-Oh", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/250.gif", level: 80, xp: 0, xpNeeded: 8000, incomePerMin: 560, onExpedition: false }
 },
+{
+    id: "leg_regirock", title: "Gardien de Pierre (260)", desc: "Débloquer 260 Pokémon pour obtenir Regirock.",
+    check: () => gameState.discoveredPokemon.length >= 260,
+    monster: { name: "Regirock", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/377.gif", level: 60, xp: 0, xpNeeded: 8000, incomePerMin: 600, onExpedition: false }
+},
+{
+    id: "leg_regice", title: "Gardien des Glaces (270)", desc: "Débloquer 270 Pokémon pour obtenir Regice.",
+    check: () => gameState.discoveredPokemon.length >= 270,
+    monster: { name: "Regice", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/378.gif", level: 60, xp: 0, xpNeeded: 8000, incomePerMin: 600, onExpedition: false }
+},
+{
+    id: "leg_registeel", title: "Gardien d'Acier (280)", desc: "Débloquer 280 Pokémon pour obtenir Registeel.",
+    check: () => gameState.discoveredPokemon.length >= 280,
+    monster: { name: "Registeel", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/379.gif", level: 60, xp: 0, xpNeeded: 8000, incomePerMin: 600, onExpedition: false }
+},
+{
+    id: "leg_latias", title: "Sœur Éon (290)", desc: "Débloquer 290 Pokémon pour obtenir Latias.",
+    check: () => gameState.discoveredPokemon.length >= 290,
+    monster: { name: "Latias", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/380.gif", level: 70, xp: 0, xpNeeded: 9000, incomePerMin: 650, onExpedition: false }
+},
+{
+    id: "leg_latios", title: "Frère Éon (300)", desc: "Débloquer 300 Pokémon pour obtenir Latios.",
+    check: () => gameState.discoveredPokemon.length >= 300,
+    monster: { name: "Latios", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/381.gif", level: 70, xp: 0, xpNeeded: 9000, incomePerMin: 650, onExpedition: false }
+},
+{
+    id: "leg_kyogre", title: "Maître des Océans (310)", desc: "Débloquer 310 Pokémon pour obtenir Kyogre.",
+    check: () => gameState.discoveredPokemon.length >= 310,
+    monster: { name: "Kyogre", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/382.gif", level: 80, xp: 0, xpNeeded: 10000, incomePerMin: 700, onExpedition: false }
+},
+{
+    id: "leg_groudon", title: "Maître des Continents (320)", desc: "Débloquer 320 Pokémon pour obtenir Groudon.",
+    check: () => gameState.discoveredPokemon.length >= 320,
+    monster: { name: "Groudon", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/383.gif", level: 80, xp: 0, xpNeeded: 10000, incomePerMin: 700, onExpedition: false }
+},
+{
+    id: "leg_rayquaza", title: "Gardien des Cieux (330)", desc: "Débloquer 330 Pokémon pour obtenir Rayquaza.",
+    check: () => gameState.discoveredPokemon.length >= 330,
+    monster: { name: "Rayquaza", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/384.gif", level: 90, xp: 0, xpNeeded: 12000, incomePerMin: 800, onExpedition: false }
+},
+{
+    id: "leg_jirachi", title: "Étoile des Vœux (350)", desc: "Débloquer 350 Pokémon pour obtenir Jirachi.",
+    check: () => gameState.discoveredPokemon.length >= 350,
+    monster: { name: "Jirachi", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/385.gif", level: 50, xp: 0, xpNeeded: 5000, incomePerMin: 600, onExpedition: false }
+}
 
 ];
 function claimPromoCode() {
@@ -77,11 +122,42 @@ function claimPromoCode() {
         showNotification(`💰 +5000 PO !`);
     } 
     else if (code === "DESOLE") {
-        gameState.money += 500000; 
+        gameState.money += 50000; 
         gameState.claimedCodes.push(code); 
         showNotification(`💰 +500000 PO !`);
-        gameState.items.bonbonMax += 50;
+        gameState.items.bonbonMax += 8;
     } 
+    if (code === "EXTRAPOKEMON") {
+    // Vérifie si le joueur a déjà utilisé ce code
+    if (gameState.claimedCodes.includes("EXTRAPOKEMON")) {
+        showNotification("❌ Ce code a déjà été utilisé !");
+    } else {
+        let finalIncome = generateRandomStats(750); // Revenu élevé pour un légendaire
+        let p = { 
+            id: Date.now() + Math.random(), 
+            name: "Deoxys", 
+            image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/386.gif", 
+            level: 50, 
+            xp: 0, 
+            xpNeeded: 8000, 
+            incomePerMin: finalIncome, 
+            onExpedition: false 
+        };
+        
+        if (gameState.activeTeam.length < 6) {
+            gameState.activeTeam.push(p); 
+        } else {
+            gameState.reserve.push(p);
+        }
+        
+        gameState.claimedCodes.push(code); 
+        discoverPokemon("Deoxys"); 
+        sortReserveByID(); 
+        saveGame();
+        updateUI();
+        showNotification(`👽 Cadeau : Un mystérieux ${p.name} apparaît !`);
+    }
+}
     else if (code === "PRECIEUSELAURA") {
         let cadeauxLaura = [
             { name: "Canarticho", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/83.png", incomePerMin: 180 },
@@ -121,4 +197,6 @@ function claimPromoCode() {
     input.value = ""; 
     saveGame(); 
     updateUI();
+
+
 }

@@ -100,19 +100,36 @@
             </div>
 
             <div id="tab-oeufs" class="tab-content">
-                <div class="section-title">Boutique d'Œufs</div>
-                <div style="display: flex; flex-direction: column; gap: 15px; padding: 10px;">
-                    <div style="background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #334155;">
-                        <h3 style="color: white; margin: 0 0 10px 0; font-size: 14px;">🥚 Œuf Kanto Mystère</h3>
-                        <button onclick="buyEgg('kanto')" style="background: #f59e0b; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">ACHETER (5000 PO)</button>
-                    </div>
+    <div class="section-title">Boutique d'Œufs</div>
+    <div style="display: flex; flex-direction: column; gap: 15px; padding: 10px;">
+        
+        <div style="background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #334155;">
+            <h3 style="color: white; margin: 0 0 10px 0; font-size: 14px;"> Œuf Kanto Mystère</h3>
+            <button id="btn-buy-kanto" onclick="buyEgg('kanto')" style="background: #f59e0b; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">ACHETER (5000 PO)</button>
+        </div>
 
-                    <div style="background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #334155;">
-                        <h3 style="color: white; margin: 0 0 10px 0; font-size: 14px;">🌱 Œuf Johto Mystère</h3>
-                        <button onclick="buyEgg('johto')" style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">ACHETER (8000 PO)</button>
-                    </div>
-                </div>
-            </div>
+        <div style="background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #334155;">
+            <h3 style="color: white; margin: 0 0 10px 0; font-size: 14px;"> Œuf Johto Mystère</h3>
+            <button id="btn-buy-johto" onclick="buyEgg('johto')" style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">ACHETER (8000 PO)</button>
+        </div>
+
+        <div style="background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #334155;">
+            <h3 style="color: white; margin: 0 0 10px 0; font-size: 14px;"> Œuf Hoenn Mystère</h3>
+            <button id="btn-buy-hoenn" onclick="buyEgg('hoenn')" style="background: #059669; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">ACHETER (12000 PO)</button>
+        </div>
+
+        <div style="background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #334155;">
+            <h3 style="color: white; margin: 0 0 10px 0; font-size: 14px;"> Œuf Sinnoh Mystère</h3>
+            <button id="btn-buy-sinnoh" onclick="buyEgg('sinnoh')" style="background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">ACHETER (15000 PO)</button>
+        </div>
+
+        <div style="background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #334155;">
+            <h3 style="color: white; margin: 0 0 10px 0; font-size: 14px;"> Œuf Unys Mystère</h3>
+            <button id="btn-buy-unys" onclick="buyEgg('unys')" style="background: #db2777; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">ACHETER (20000 PO)</button>
+        </div>
+
+    </div>
+</div>
 
             <div id="tab-succes" class="tab-content">
                 <div class="section-title">Objectifs & Système</div>

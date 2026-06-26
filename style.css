@@ -278,14 +278,16 @@ body {
 /* ==========================================================================
    ONGLET STOCK (RESERVE COMPACTE 5 COLONNES)
    ========================================================================== */
+
 .reserve-grid {
     display: grid; 
-    grid-template-columns: repeat(5, 1fr); 
-    gap: 4px;
+    /* Change 5 en 4 ici */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 6px;
     background-color: #1b202c; 
     border: 2px solid #e17c3e; 
     border-radius: 14px; 
-    padding: 8px;
+    padding: 10px;
     width: 100%;
 }
 
@@ -455,9 +457,14 @@ body {
     50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.9); }
 }
 
-.baby-border {
+/* ==========================================================================
+   STYLE ABSOLU POUR LES BÉBÉS (PRIORITÉ MAXIMALE)
+   ========================================================================== */
+.reserve-grid .monster-card.baby-border,
+.team-enclosure .monster-card.baby-border {
     border: 3px solid #f472b6 !important;
-    box-shadow: 0 0 10px rgba(244, 114, 182, 0.5);
+    box-shadow: 0 0 12px rgba(244, 114, 182, 0.7) !important;
+   
 }
 /* ==========================================================================
    STYLE GLOBAL POUR LES NOMS DES POKÉMON
@@ -468,4 +475,10 @@ body {
     color: #ffffff;
     text-align: center;
     margin-top: 4px;
+}
+button:disabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+    filter: grayscale(1);
+    background-color: #475569 !important; /* Couleur grise pour indiquer le verrouillage */
 }
