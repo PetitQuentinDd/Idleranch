@@ -102,6 +102,8 @@ const ACHIEVEMENTS_CONFIG = [
 function claimPromoCode() {
     let input = document.getElementById("promo-input-field"); 
     let code = input.value.trim().toUpperCase(); 
+    console.log("Code entré :", code); // Ajoute cette ligne
+    
     if (!code) return;
     
     if (gameState.claimedCodes.includes(code)) { 
@@ -116,11 +118,37 @@ function claimPromoCode() {
         if (gameState.activeTeam.length < 6) gameState.activeTeam.push(p); else gameState.reserve.push(p);
         gameState.claimedCodes.push(code); discoverPokemon("Pikachu"); sortReserveByID(); showNotification(`🎉 Cadeau : ${p.name}`);
     } 
+    // Si le code est validé
+    if (code === "NIVEAU100") {
+    // On ne modifie QUE l'équipe active
+    gameState.activeTeam.forEach(m => {
+        m.level = 100;
+        m.xp = 0;
+        m.xpNeeded = 10000;
+        
+        // Optionnel : On peut forcer l'évolution si c'est possible
+        if (m.nextForm) {
+            // Ici, le nom deviendra doré dans l'interface et l'évolution sera possible
+        }
+    });
+    
+    showNotification("⚡ CODE PROMO : Votre équipe de travail est passée Niveau 100 !");
+    saveGame();
+    updateUI();
+}
     else if (code === "RICHESSE") {
         gameState.money += 5000; 
         gameState.claimedCodes.push(code); 
         showNotification(`💰 +5000 PO !`);
+        
     } 
+
+    else if (code === "DEVMODE") {
+    activerMenuDev();
+    gameState.isDevMode = true;
+    showNotification("Mode Développeur activé !");
+    saveGame();
+}
     else if (code === "DESOLE") {
         gameState.money += 50000; 
         gameState.claimedCodes.push(code); 

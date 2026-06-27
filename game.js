@@ -95,55 +95,30 @@ function appliquerObjetAuPokemon(reserveIndex, itemId) {
     }
     // 2. GESTION ÉVOLUTIONS (Évoli + Autres)
     else if (config.type === "evolution") {
-        // Bloc Évoli
-        if (p.name === "Évoli" || p.evolutionCondition === "special_eevee") {
-            if (["pierreEau", "pierreFeu", "pierreFoudre", "pierreLune", "pierreSoleil"].includes(itemId)) {
-                let targetName = "";
-                if (itemId === "pierreEau") targetName = "Aquali";
-                else if (itemId === "pierreFeu") targetName = "Pyroli";
-                else if (itemId === "pierreFoudre") targetName = "Voltali";
-                else if (itemId === "pierreLune") targetName = "Noctali";
-                else if (itemId === "pierreSoleil") targetName = "Mentali";
-
-                let evoData = POKEDEX.kanto.evolutions[targetName] || POKEDEX.johto.evolutions[targetName];
-                
-                if (evoData) {
-                    gameState.items[itemId]--;
-                    p.name = evoData.name; 
-                    p.image = evoData.image;
-                    p.incomePerMin = p.isBaby ? Math.floor(evoData.incomePerMin * 1.25) : evoData.incomePerMin;
-                    p.evolutionCondition = null; 
-                    p.nextForm = null; 
-                    p.itemNeeded = null; 
-                    p.evolutionLevel = null;
-                    discoverPokemon(evoData.name); 
-                    showNotification(`✨ Évoli évolue en ${p.name} !`);
-                } else {
-                    showNotification("Erreur : Évolution introuvable pour " + targetName);
-                }
-            } else { 
-                showNotification("Cette pierre n'a aucun effet sur Évoli."); 
-            }
+    // On cherche les infos dans les données (Kanto ou Johto)
+    let evoData = POKEDEX.kanto.evolutions[p.nextForm] || POKEDEX.johto.evolutions[p.nextForm];
+    
+    // Vérification : Le Pokémon a-t-il besoin d'un item et est-ce le bon ?
+    if (p.evolutionCondition === "item" && p.itemNeeded === itemId) {
+        if (evoData) {
+            gameState.items[itemId]--;
+            p.name = evoData.name; 
+            p.image = evoData.image;
+            p.incomePerMin = Math.floor(evoData.incomePerMin * (p.incomePerMin / (p.baseIncome || 100))); // Ratio conservé
+            
+            // Mise à jour des conditions pour la forme suivante
+            p.nextForm = evoData.nextForm || null;
+            p.evolutionCondition = evoData.evolutionCondition || null;
+            p.evolutionLevel = evoData.evolutionLevel || null;
+            p.itemNeeded = evoData.itemNeeded || null;
+            
+            discoverPokemon(evoData.name); 
+            showNotification(`✨ Évolution réussie en ${p.name} !`);
         }
-        // Bloc autres évolutions
-        else {
-            let localEvoConfig = POKEDEX.kanto.evolutions[p.name] || POKEDEX.johto.evolutions[p.name];
-            if (localEvoConfig && localEvoConfig.evolutionCondition === "item" && localEvoConfig.itemNeeded === itemId) {
-                let nextFormName = localEvoConfig.nextForm;
-                let evoData = POKEDEX.kanto.evolutions[nextFormName] || POKEDEX.johto.evolutions[nextFormName];
-                if (evoData) {
-                    gameState.items[itemId]--;
-                    p.name = evoData.name; p.image = evoData.image;
-                    p.incomePerMin = p.isBaby ? Math.floor(evoData.incomePerMin * 1.25) : evoData.incomePerMin;
-                    p.evolutionCondition = evoData.evolutionCondition || null; p.nextForm = evoData.nextForm || null;
-                    p.itemNeeded = evoData.itemNeeded || null; p.evolutionLevel = evoData.evolutionLevel || null;
-                    discoverPokemon(evoData.name); showNotification(`✨ Évolution réussie en ${p.name} !`);
-                }
-            } else { 
-                showNotification("Cet objet n'a aucun effet sur ce Pokémon."); 
-            }
-        }
+    } else {
+        showNotification("Cet objet n'a aucun effet sur ce Pokémon.");
     }
+}
     
     itemSelectionneActuel = null; 
     saveGame(); 
@@ -1042,7 +1017,149 @@ window.onload = function () {
         updateUI();
     }, 10000);
 
+    function activerMenuDev() {
+    document.getElementById("btn-dev-menu").style.display = "block";
+    document.getElementById("btn-dev-menu").onclick = () => {
+        let panel = document.getElementById("dev-menu-panel");
+        panel.style.display = (panel.style.display === "none") ? "block" : "none";
+        
+        // Remplir la liste des Pokémon si ce n'est pas déjà fait
+        let select = document.getElementById("dev-poke-select");
+        if (select.options.length === 0) {
+            [...POKEDEX.kanto.commun, ...POKEDEX.kanto.rare].forEach(p => {
+                let opt = document.createElement("option");
+                opt.value = p.name;
+                opt.innerHTML = p.name;
+                select.appendChild(opt);
+            });
+        }
+    };
+}
+
+function genererPokemonDev() {
+    let name = document.getElementById("dev-poke-select").value;
+    let level = parseInt(document.getElementById("dev-poke-level").value);
+    let income = parseInt(document.getElementById("dev-poke-income").value);
+    
+    let ref = [...POKEDEX.kanto.commun, ...POKEDEX.kanto.rare].find(p => p.name === name);
+    
+    let nouveauPokemon = {
+        id: Date.now() + Math.random(),
+        name: ref.name,
+        image: ref.image,
+        level: level,
+        xp: 0,
+        xpNeeded: level * 100,
+        incomePerMin: income,
+        nextForm: ref.nextForm || null,
+        evolutionCondition: ref.evolutionCondition || null,
+        evolutionLevel: ref.evolutionLevel || null
+    };
+    
+    gameState.reserve.push(nouveauPokemon);
+    showNotification("Pokémon généré avec succès !");
+    updateUI();
+}
+
     setInterval(() => { initAreneUI(); }, 60000);
     initAreneUI(); 
     updateUI();
 };
+// ==========================================
+// OUTILS DEVELOPPEUR (Version Visuelle Modale)
+// ==========================================
+
+let pokemonEnCoursDeGeneration = null;
+
+function getAllPokemonSafe() {
+    let tousLesPokemon = [];
+    for (let region in POKEDEX) {
+        for (let categorie in POKEDEX[region]) {
+            if (Array.isArray(POKEDEX[region][categorie])) {
+                tousLesPokemon = tousLesPokemon.concat(POKEDEX[region][categorie]);
+            }
+        }
+    }
+    return tousLesPokemon;
+}
+
+function activerMenuDev() {
+    let btn = document.getElementById("btn-dev-menu");
+    if (btn) btn.style.display = "block"; // Affiche le bouton dans la boutique Œuf
+}
+
+// 1. Ouvre le Pokedex Géant
+function ouvrirDevPokedex() {
+    document.getElementById("dev-pokedex-modal").style.display = "flex";
+    let grid = document.getElementById("dev-pokedex-grid");
+    grid.innerHTML = ""; // On vide pour éviter les doublons
+    
+    let tousLesPokemon = getAllPokemonSafe();
+    
+    // Crée une petite carte cliquable pour chaque Pokémon
+    tousLesPokemon.forEach(p => {
+        let card = document.createElement("div");
+        card.style = "width: 75px; height: 95px; background: #334155; border: 2px solid #475569; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;";
+        card.innerHTML = `<img src="${p.image}" style="width: 50px; height: 50px; margin-bottom: 5px;">
+                          <span style="font-size: 10px; color: white; text-align: center; line-height: 1; font-weight: bold;">${p.name}</span>`;
+        
+        // Au clic, on ouvre la petite fenêtre pour choisir le niveau
+        card.onclick = () => ouvrirDevStats(p);
+        
+        grid.appendChild(card);
+    });
+}
+
+// 2. Ouvre la fenêtre Niveau/Argent
+function ouvrirDevStats(pokeRef) {
+    pokemonEnCoursDeGeneration = pokeRef; // On mémorise le choix
+    document.getElementById("dev-stats-name").innerText = pokeRef.name;
+    document.getElementById("dev-stats-img").src = pokeRef.image;
+    
+    // On pré-remplit l'argent avec ses stats de base pour t'aider
+    document.getElementById("dev-poke-level").value = 1;
+    document.getElementById("dev-poke-income").value = pokeRef.incomePerMin || 100;
+    
+    document.getElementById("dev-stats-modal").style.display = "flex";
+}
+
+// 3. Valide et crée le Pokémon
+function validerGenerationDev() {
+    if (!pokemonEnCoursDeGeneration) return;
+    
+    let level = parseInt(document.getElementById("dev-poke-level").value) || 1;
+    let income = parseInt(document.getElementById("dev-poke-income").value) || 100;
+    let ref = pokemonEnCoursDeGeneration;
+
+    let nouveauPokemon = {
+        id: Date.now() + Math.random(),
+        name: ref.name,
+        image: ref.image,
+        level: level,
+        xp: 0,
+        xpNeeded: level * 100,
+        incomePerMin: income,
+        onExpedition: false,
+        nextForm: ref.nextForm || null,
+        evolutionCondition: ref.evolutionCondition || null,
+        itemNeeded: ref.itemNeeded || null,
+        evolutionLevel: ref.evolutionLevel || null
+    };
+    
+    gameState.reserve.push(nouveauPokemon);
+    showNotification(`🛠️ ${ref.name} (Niv ${level}) généré avec succès dans la réserve !`);
+    
+    // On ferme tout
+    document.getElementById("dev-stats-modal").style.display = "none";
+    document.getElementById("dev-pokedex-modal").style.display = "none";
+    pokemonEnCoursDeGeneration = null;
+    
+    sortReserveByID();
+    saveGame();
+    updateUI();
+}
+
+// Vérification au chargement
+if (gameState.isDevMode) {
+    activerMenuDev();
+}
