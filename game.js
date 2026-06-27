@@ -1148,6 +1148,10 @@ function validerGenerationDev() {
     
     gameState.reserve.push(nouveauPokemon);
     showNotification(`🛠️ ${ref.name} (Niv ${level}) généré avec succès dans la réserve !`);
+
+    if (typeof discoverPokemon === "function") {
+        discoverPokemon(ref.name);
+    }
     
     // On ferme tout
     document.getElementById("dev-stats-modal").style.display = "none";
