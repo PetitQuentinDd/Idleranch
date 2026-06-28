@@ -1037,15 +1037,22 @@ const POKEDEX_LIST = [
     { id: "1017", name: "Favianos", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1017.png" },
     { id: "1018", name: "Terapagos", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1018.png" },
     { id: "1019", name: "Pêchaminus", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1019.png" },
+    { id: "1020", name: "???", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1020.png" },
+    { id: "1021", name: "???", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1021.png" },
+    { id: "1022", name: "???", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1022.png" },
+    { id: "1023", name: "???", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1023.png" },
+    { id: "1024", name: "???", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1024.png" },
+    { id: "1025", name: "???", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1025.png" },
 ];
-// Les zones servent de décor et de durée d'expédition (le butin est maintenant défini aléatoirement dans checkExpeditionEnd)
 // data.js
 const ZONES = [
     { id: 0, name: "Forêt aux Insectes", duration: 1200, desc: "Exploration Courte (20 min)", lootWeight: 1 }, 
     { id: 1, name: "Balade en ville", duration: 3600, desc: "Exploration Longue (1h)", lootWeight: 2 },
     { id: 2, name: "Grotte Sombre", duration: 14400, desc: "Exploration Nuit (4h)", lootWeight: 5 },
-    { id: 3, name: "Îles Orange", duration: 28800, desc: "Exploration Épique (8h)", lootWeight: 10 }
+    { id: 3, name: "Îles Orange", duration: 28800, desc: "Exploration Épique (8h)", lootWeight: 10 },
+    { id: 4, name: "Canyon de l'Éveil", duration: 43200, desc: "Exploration Spéciale (12h) - Risque de trouver une Méga-Gemme", lootWeight: 20 }
 ];
+
 // Arènes beaucoup plus accessibles et logiques
 const CHAMPIONS = [
     { id: "pierre", name: "Pierre (Niv recomm. 15+)", hp: 2000, atk: 50, rewardMoney: 10000, rewardStone: "pierreFeu" },
@@ -1055,5 +1062,71 @@ const CHAMPIONS = [
     { id: "koga", name: "Koga (Niv recomm. 75+)", hp: 25000, atk: 600, rewardMoney: 10000, rewardStone: "pierrePlante" },
     { id: "morgane", name: "Morgane (Niv recomm. 90+)", hp: 40000, atk: 900, rewardMoney: 10000, rewardStone: "pierreLune" },
     { id: "auguste", name: "Auguste (Niv recomm. 100+)", hp: 60000, atk: 1300, rewardMoney: 10000, rewardStone: "pierreFeu" },
-    { id: "giovanni", name: "Giovanni (Niv recomm. 120+)", hp: 90000, atk: 2000, rewardMoney: 10000, rewardStone: "pierrePlante" }
+    { id: "giovanni", name: "Giovanni (Niv recomm. 120+)", hp: 75000, atk: 2000, rewardMoney: 10000, rewardStone: "pierrePlante" }
 ];
+const MEGA_ITEMS = {
+   
+    florizarrite: {
+        id: "florizarrite",
+        name: "Florizarrite",
+        description: "Permet de faire méga-évoluer Florizarre en Méga-Florizarre.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/venusaurite.png",
+        price: 5000
+    },
+    dracaufiteX: {
+        id: "dracaufiteX",
+        name: "Dracaufite X",
+        description: "Permet de faire méga-évoluer Dracaufeu en Méga-Dracaufeu X.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charizardite-x.png",
+        price: 5000
+    },
+    dracaufiteY: {
+        id: "dracaufiteY",
+        name: "Dracaufite Y",
+        description: "Permet de faire méga-évoluer Dracaufeu en Méga-Dracaufeu Y.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charizardite-y.png",
+        price: 5000
+    },
+    tortankite: {
+        id: "tortankite",
+        name: "Tortankite",
+        description: "Permet de faire méga-évoluer Tortank en Méga-Tortank.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/blastoisinite.png",
+        price: 5000
+    },
+    mewtwoniteX: {
+        id: "mewtwoniteX",
+        name: "Mewtwonite X",
+        description: "Permet de faire méga-évoluer Mewtwo en Méga-Mewtwo X.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mewtwonite-x.png",
+        price: 15000
+    },
+    mewtwoniteY: {
+        id: "mewtwoniteY",
+        name: "Mewtwonite Y",
+        description: "Permet de faire méga-évoluer Mewtwo en Méga-Mewtwo Y.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mewtwonite-y.png",
+        price: 15000
+    },
+    lucarite: {
+        id: "lucarite",
+        name: "Lucarite",
+        description: "Permet de faire méga-évoluer Lucario en Méga-Lucario.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lucarionite.png",
+        price: 5000
+    },
+    diancite: {
+        id: "diancite",
+        name: "Diancite",
+        description: "Permet de faire méga-évoluer Diancie en Méga-Diancie.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/diancite.png",
+        price: 10000
+    },
+    rayquazite: {
+        id: "rayquazite",
+        name: "Éclat Météore",
+        description: "Une météorite chargée d'énergie qui permet à Rayquaza de méga-évoluer.",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/meteorite.png",
+        price: 15000
+    }
+};

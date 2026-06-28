@@ -482,3 +482,19 @@ button:disabled {
     filter: grayscale(1);
     background-color: #475569 !important; /* Couleur grise pour indiquer le verrouillage */
 }
+.btn-evo-pierre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-evo-pierre img {
+    pointer-events: none; /* Empêche de cliquer sur l'image et de rater le clic bouton */
+}

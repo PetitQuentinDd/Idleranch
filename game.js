@@ -79,6 +79,17 @@ function appliquerObjetAuPokemon(reserveIndex, itemId) {
     
     if (!p || !config || gameState.items[itemId] <= 0) return;
 
+    // --- NOUVEAU : Sécurité pour limiter au Ranch (Réserve) ---
+    // Si tu veux aussi autoriser l'équipe, ajoute : || gameState.activeTeam.includes(p)
+    let estAuRanch = gameState.reserve.includes(p);
+    let estDansEquipe = gameState.activeTeam.includes(p);
+
+    if (!estAuRanch && !estDansEquipe) {
+        showNotification("❌ Cet objet ne peut être utilisé que sur un Pokémon au Ranch ou dans l'équipe !");
+        itemSelectionneActuel = null;
+        return;
+    }
+
     // 1. GESTION BONBONS
     if (config.type === "candy") {
         if (p.bonbonsUtilises === undefined) p.bonbonsUtilises = 0;
@@ -91,34 +102,39 @@ function appliquerObjetAuPokemon(reserveIndex, itemId) {
         p.incomePerMin = Math.round(p.incomePerMin * config.multiplier); 
         gameState.items[itemId]--;
         p.bonbonsUtilises++;
-        showNotification(`🍬 ${p.name} mange un ${config.name} (${p.bonbonsUtilises}/2) ! Ses bénéfices augmentent !`);
+        showNotification(`🍬 ${p.name} mange un ${config.name} (${p.bonbonsUtilises}/2) !`);
     }
-    // 2. GESTION ÉVOLUTIONS (Évoli + Autres)
+    // 2. GESTION ÉVOLUTIONS
     else if (config.type === "evolution") {
-    // On cherche les infos dans les données (Kanto ou Johto)
-    let evoData = POKEDEX.kanto.evolutions[p.nextForm] || POKEDEX.johto.evolutions[p.nextForm];
-    
-    // Vérification : Le Pokémon a-t-il besoin d'un item et est-ce le bon ?
-    if (p.evolutionCondition === "item" && p.itemNeeded === itemId) {
-        if (evoData) {
-            gameState.items[itemId]--;
-            p.name = evoData.name; 
-            p.image = evoData.image;
-            p.incomePerMin = Math.floor(evoData.incomePerMin * (p.incomePerMin / (p.baseIncome || 100))); // Ratio conservé
-            
-            // Mise à jour des conditions pour la forme suivante
-            p.nextForm = evoData.nextForm || null;
-            p.evolutionCondition = evoData.evolutionCondition || null;
-            p.evolutionLevel = evoData.evolutionLevel || null;
-            p.itemNeeded = evoData.itemNeeded || null;
-            
-            discoverPokemon(evoData.name); 
-            showNotification(`✨ Évolution réussie en ${p.name} !`);
+        // Recherche dynamique dans toutes les régions du POKEDEX
+        let evoData = null;
+        for (let region in POKEDEX) {
+            if (POKEDEX[region].evolutions && POKEDEX[region].evolutions[p.nextForm]) {
+                evoData = POKEDEX[region].evolutions[p.nextForm];
+                break;
+            }
         }
-    } else {
-        showNotification("Cet objet n'a aucun effet sur ce Pokémon.");
+        
+        if (p.evolutionCondition === "item" && p.itemNeeded === itemId) {
+            if (evoData) {
+                gameState.items[itemId]--;
+                p.name = evoData.name; 
+                p.image = evoData.image;
+                // Calcul du revenu conservé
+                p.incomePerMin = Math.floor(evoData.incomePerMin * (p.incomePerMin / (p.baseIncome || 100))); 
+                
+                p.nextForm = evoData.nextForm || null;
+                p.evolutionCondition = evoData.evolutionCondition || null;
+                p.evolutionLevel = evoData.evolutionLevel || null;
+                p.itemNeeded = evoData.itemNeeded || null;
+                
+                discoverPokemon(evoData.name); 
+                showNotification(`✨ Évolution réussie en ${p.name} !`);
+            }
+        } else {
+            showNotification("Cet objet n'a aucun effet sur ce Pokémon.");
+        }
     }
-}
     
     itemSelectionneActuel = null; 
     saveGame(); 
@@ -576,9 +592,9 @@ function triggerEeveeEvolution(id, item) {
 function updateBoutiquesVisuals() {
     const boutiques = {
         'johto': { leg: 'leg_mewtwo', name: 'Mewtwo', defaultText: 'ACHETER (8000 PO)', color: '#2563eb' },
-        'hoenn': { leg: 'leg_kyogre', name: 'Kyogre', defaultText: 'ACHETER (12000 PO)', color: '#059669' },
-        'sinnoh': { leg: 'leg_dialga', name: 'Dialga', defaultText: 'ACHETER (15000 PO)', color: '#7c3aed' },
-        'unys': { leg: 'leg_reshiram', name: 'Reshiram', defaultText: 'ACHETER (20000 PO)', color: '#db2777' }
+        'hoenn': { leg: 'leg_lugia', name: 'Lugia', defaultText: 'ACHETER (12000 PO)', color: '#059669' },
+        'sinnoh': { leg: 'leg_kyogre', name: 'Kyogre', defaultText: 'ACHETER (15000 PO)', color: '#7c3aed' },
+        'unys': { leg: 'leg_dialga', name: 'Dialga', defaultText: 'ACHETER (20000 PO)', color: '#db2777' }
     };
 
     Object.keys(boutiques).forEach(region => {
@@ -1148,11 +1164,10 @@ function validerGenerationDev() {
     
     gameState.reserve.push(nouveauPokemon);
     showNotification(`🛠️ ${ref.name} (Niv ${level}) généré avec succès dans la réserve !`);
-
+    
     if (typeof discoverPokemon === "function") {
         discoverPokemon(ref.name);
     }
-    
     // On ferme tout
     document.getElementById("dev-stats-modal").style.display = "none";
     document.getElementById("dev-pokedex-modal").style.display = "none";
@@ -1166,4 +1181,24 @@ function validerGenerationDev() {
 // Vérification au chargement
 if (gameState.isDevMode) {
     activerMenuDev();
+}
+function genererBoutonEvolution(pokemon) {
+    // Si le Pokémon nécessite un objet pour évoluer
+    if (pokemon.evolutionCondition === "item" && pokemon.itemNeeded) {
+        // On récupère les infos de la pierre depuis la constante ITEMS_CONFIG existante
+        const pierre = ITEMS_CONFIG[pokemon.itemNeeded];
+        
+        // Si on trouve la pierre, on affiche le bouton avec l'image
+        if (pierre) {
+            return `
+                <button class="btn-evo-pierre" onclick="tenterEvolution('${pokemon.id}')">
+                    <img src="${pierre.image}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
+                    Évoluer
+                </button>
+            `;
+        }
+    }
+    
+    // Cas par défaut (pour les évolutions par niveau)
+    return `<button class="btn-evo-simple" onclick="tenterEvolution('${pokemon.id}')">Évoluer</button>`;
 }

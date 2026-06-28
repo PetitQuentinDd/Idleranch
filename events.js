@@ -187,14 +187,7 @@ function claimPromoCode() {
     }
 }
     else if (code === "PRECIEUSELAURA") {
-        let cadeauxLaura = [
-            { name: "Canarticho", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/83.png", incomePerMin: 180 },
-            { name: "Kicklee", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/106.png", incomePerMin: 200 },
-            { name: "Tygnon", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/107.png", incomePerMin: 200 },
-            { name: "Levainard", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png", incomePerMin: 250 },
-            { name: "Miaouss", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/52.png", incomePerMin: 150, nextForm: "Persian", evolutionCondition: "level", evolutionLevel: 28 }
-        ];
-
+       
         cadeauxLaura.forEach(poke => {
             let finalIncome = generateRandomStats(poke.incomePerMin);
             let p = { id: Date.now() + Math.random(), name: poke.name, image: poke.image, nextForm: poke.nextForm || null, level: 1, xp: 0, xpNeeded: 100, incomePerMin: finalIncome, evolutionCondition: poke.evolutionCondition || null, evolutionLevel: poke.evolutionLevel || null, onExpedition: false };
@@ -205,7 +198,7 @@ function claimPromoCode() {
         gameState.items.bonbonMax += 6;
         gameState.claimedCodes.push(code); 
         sortReserveByID(); 
-        showNotification(`🎉 Code accepté ! Canarticho, Kicklee, Tygnon, Levainard, Miaouss et 6 Bonbons Max ajoutés !`);
+        showNotification(`🎉 Code accepté !  6 Bonbons Max ajoutés !`);
     } 
     else if (code === "TOHJOGIOVANNI") {
         let finalIncome = generateRandomStats(520);
