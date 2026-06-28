@@ -110,7 +110,27 @@ function claimPromoCode() {
         showNotification("Code déjà utilisé !"); 
         input.value = ""; 
         return; 
+    } 
+    function appliquerCodePromo(code) {
+    if (code === "BONUS5") {
+        // Liste des objets à ajouter
+        const objetsAajouter = ["pierrePlante", "pierreSoleil", "pierreFeu"]; 
+        
+        objetsAajouter.forEach(id => {
+            // Ajoute 5 fois l'objet dans l'inventaire
+            for(let i = 0; i < 5; i++) {
+                gameState.inventory.push(id);
+            }
+        });
+        
+        console.log("Code validé ! 5 exemplaires de chaque pierre ajoutés.");
+        saveGame(); // Sauvegarde les changements
+        updateInventoryDisplay(); // Rafraîchit l'affichage
+    } else {
+        console.log("Code invalide.");
     }
+}
+un
 
     if (code === "WELCOME") {
         let finalIncome = generateRandomStats(180);
