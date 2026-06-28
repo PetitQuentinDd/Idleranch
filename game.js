@@ -74,23 +74,18 @@ function selectionnerObjetPourAction(itemId) {
 }
 
 function appliquerObjetAuPokemon(reserveIndex, itemId) {
+    // 1. Vérification de base
     let p = gameState.reserve[reserveIndex]; 
     let config = ITEMS_CONFIG[itemId];
     
-    if (!p || !config || gameState.items[itemId] <= 0) return;
-
-    // --- NOUVEAU : Sécurité pour limiter au Ranch (Réserve) ---
-    // Si tu veux aussi autoriser l'équipe, ajoute : || gameState.activeTeam.includes(p)
-    let estAuRanch = gameState.reserve.includes(p);
-    let estDansEquipe = gameState.activeTeam.includes(p);
-
-    if (!estAuRanch && !estDansEquipe) {
-        showNotification("❌ Cet objet ne peut être utilisé que sur un Pokémon au Ranch ou dans l'équipe !");
+    if (!p) {
+        showNotification("❌ Erreur : Pokémon non trouvé dans le Ranch !");
         itemSelectionneActuel = null;
         return;
     }
+    if (!config || gameState.items[itemId] <= 0) return;
 
-    // 1. GESTION BONBONS
+    // 2. GESTION BONBONS
     if (config.type === "candy") {
         if (p.bonbonsUtilises === undefined) p.bonbonsUtilises = 0;
         if (p.bonbonsUtilises >= 2) {
@@ -104,35 +99,47 @@ function appliquerObjetAuPokemon(reserveIndex, itemId) {
         p.bonbonsUtilises++;
         showNotification(`🍬 ${p.name} mange un ${config.name} (${p.bonbonsUtilises}/2) !`);
     }
-    // 2. GESTION ÉVOLUTIONS
+    
+    // 3. GESTION ÉVOLUTIONS
     else if (config.type === "evolution") {
-        // Recherche dynamique dans toutes les régions du POKEDEX
-        let evoData = null;
-        for (let region in POKEDEX) {
-            if (POKEDEX[region].evolutions && POKEDEX[region].evolutions[p.nextForm]) {
-                evoData = POKEDEX[region].evolutions[p.nextForm];
-                break;
+        // 1. Vérifie si l'item utilisé est dans la liste des items requis
+        let indexEvo = Array.isArray(p.itemNeeded) ? p.itemNeeded.indexOf(itemId) : (p.itemNeeded === itemId ? 0 : -1);
+
+        if (p.evolutionCondition === "item" && indexEvo !== -1) {
+            // 2. Détermine la forme cible
+            let nomFormeSuivante = Array.isArray(p.nextForm) ? p.nextForm[indexEvo] : p.nextForm;
+            
+            // Recherche dynamique de la forme cible dans le POKEDEX
+            let evoData = null;
+            for (let region in POKEDEX) {
+                if (POKEDEX[region].evolutions && POKEDEX[region].evolutions[nomFormeSuivante]) {
+                    evoData = POKEDEX[region].evolutions[nomFormeSuivante];
+                    break;
+                }
             }
-        }
-        
-        if (p.evolutionCondition === "item" && p.itemNeeded === itemId) {
+
             if (evoData) {
                 gameState.items[itemId]--;
                 p.name = evoData.name; 
                 p.image = evoData.image;
-                // Calcul du revenu conservé
-                p.incomePerMin = Math.floor(evoData.incomePerMin * (p.incomePerMin / (p.baseIncome || 100))); 
                 
+                // Calcul du revenu (on garde la base si elle existe, sinon on utilise 100)
+                let base = p.baseIncome || 100;
+                p.incomePerMin = Math.floor(evoData.incomePerMin * (p.incomePerMin / base)); 
+                
+                // Mise à jour des données d'évolution
                 p.nextForm = evoData.nextForm || null;
                 p.evolutionCondition = evoData.evolutionCondition || null;
-                p.evolutionLevel = evoData.evolutionLevel || null;
                 p.itemNeeded = evoData.itemNeeded || null;
+                
+                // IMPORTANT : On réinitialise les bonbons pour la nouvelle forme
+                p.bonbonsUtilises = 0;
                 
                 discoverPokemon(evoData.name); 
                 showNotification(`✨ Évolution réussie en ${p.name} !`);
             }
         } else {
-            showNotification("Cet objet n'a aucun effet sur ce Pokémon.");
+            showNotification("❌ Cet objet ne peut pas être utilisé sur ce Pokémon.");
         }
     }
     
@@ -385,7 +392,7 @@ function buyEgg(region) {
         return;
     }
 
-    const costs = { kanto: 5000, johto: 8000, hoenn: 12000, sinnoh: 15000, unys: 20000 };
+    const costs = { kanto: 5000, johto: 8000, hoenn: 12000, sinnoh: 15000, unys: 20000, };
     let cost = costs[region] || 5000;
 
     if (gameState.money >= cost) {
@@ -758,6 +765,25 @@ function createCard(m, loc) {
     }
 
     let isReadyForLevelEvo = (m.nextForm && !m.onExpedition && loc === 'team' && m.evolutionCondition === "level" && m.level >= m.evolutionLevel);
+    
+    // --- GESTION DES PIERRES (Multi-pierres supporté) ---
+    let htmlBouton = "";
+    if (m.evolutionCondition === "item" && m.itemNeeded && loc === 'reserve') {
+        // On transforme en tableau si c'est une seule pierre, pour gérer les cas multiples (Ortide/Têtarte)
+        let items = Array.isArray(m.itemNeeded) ? m.itemNeeded : [m.itemNeeded];
+        
+        items.forEach(itemId => {
+            let pierre = ITEMS_CONFIG[itemId];
+            if (pierre) {
+                htmlBouton += `
+                    <button class="pierre-btn" onclick="event.stopPropagation(); tenterEvolution('${m.id}', '${itemId}')" title="Utiliser ${pierre.name}">
+                        <img src="${pierre.image}" style="width: 24px; height: 24px; display: block;">
+                    </button>`;
+            }
+        });
+    } else if (isReadyForLevelEvo) {
+        htmlBouton = `<button class="btn-evo-simple" onclick="event.stopPropagation(); evolveMonster('${m.id}')">Évoluer</button>`;
+    }
 
     let tick = calculateTickIncome(m);
     let affichagePO = m.isBaby ? `⭐ +${tick} PO` : `+${tick} PO`;
@@ -775,6 +801,7 @@ function createCard(m, loc) {
             <div class="monster-name ${isReadyForLevelEvo ? 'gold-evo-text' : ''}">${m.name}</div>
             <div class="monster-xp">Lvl ${m.level}</div>
             <div class="monster-income">${affichagePO}</div>
+            <div class="evo-container" style="display:flex; justify-content:center; gap:5px; margin-top:5px;">${htmlBouton}</div>
         </div>
     `;
 
@@ -802,7 +829,6 @@ function createCard(m, loc) {
 
     return div;
 }
-
 function triggerCheckboxSelection(id, checked, cardElement) {
     if (checked) { if (!selectedForRelease.includes(id)) selectedForRelease.push(id); cardElement.style.backgroundColor = "rgba(239, 68, 68, 0.3)"; }
     else { selectedForRelease = selectedForRelease.filter(sid => sid !== id); cardElement.style.backgroundColor = ""; }

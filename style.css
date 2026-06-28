@@ -482,19 +482,21 @@ button:disabled {
     filter: grayscale(1);
     background-color: #475569 !important; /* Couleur grise pour indiquer le verrouillage */
 }
-.btn-evo-pierre {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
+.pierre-btn {
+    background: transparent !important; /* Force le fond transparent */
+    border: none !important;           /* Supprime le contour */
+    padding: 0;                        /* Supprime l'espace interne */
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.2s;        /* Petit effet sympa au survol */
 }
 
-.btn-evo-pierre img {
-    pointer-events: none; /* Empêche de cliquer sur l'image et de rater le clic bouton */
+.pierre-btn:hover {
+    transform: scale(1.1);             /* Agrandit légèrement au survol */
+}
+
+/* Optionnel : si tes images ont des bords gris ou blancs résiduels */
+.pierre-btn img {
+    filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.2));
 }
