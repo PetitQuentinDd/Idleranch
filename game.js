@@ -88,8 +88,8 @@ function appliquerObjetAuPokemon(reserveIndex, itemId) {
     // 2. GESTION BONBONS
     if (config.type === "candy") {
         if (p.bonbonsUtilises === undefined) p.bonbonsUtilises = 0;
-        if (p.bonbonsUtilises >= 2) {
-            showNotification(`❌ ${p.name} a déjà mangé 2 bonbons !`);
+        if (p.bonbonsUtilises >= 5) {
+            showNotification(`❌ ${p.name} a déjà mangé 5 bonbons !`);
             itemSelectionneActuel = null;
             return;
         }
@@ -138,6 +138,7 @@ function appliquerObjetAuPokemon(reserveIndex, itemId) {
                 discoverPokemon(evoData.name); 
                 showNotification(`✨ Évolution réussie en ${p.name} !`);
             }
+            
         } else {
             showNotification("❌ Cet objet ne peut pas être utilisé sur ce Pokémon.");
         }
@@ -633,15 +634,27 @@ function evolveMonster(id) {
     let idx = gameState.activeTeam.findIndex(m => m.id === id); if (idx === -1) return;
     let m = gameState.activeTeam[idx];
     let config = POKEDEX.kanto.evolutions[m.nextForm] || POKEDEX.johto.evolutions[m.nextForm];
+    
     if (config) {
         let basePreviousForm = [...POKEDEX.kanto.commun, ...POKEDEX.kanto.rare, ...POKEDEX.johto.commun, ...POKEDEX.johto.rare].find(p => p.name === m.name) || POKEDEX.kanto.evolutions[m.name] || POKEDEX.johto.evolutions[m.name];
         let potentialRatio = m.incomePerMin / (basePreviousForm ? basePreviousForm.incomePerMin : m.incomePerMin);
-        m.name = config.name; m.image = config.image; m.incomePerMin = Math.floor(config.incomePerMin * potentialRatio);
-        m.evolutionLevel = config.evolutionLevel || null; m.nextForm = config.nextForm || null; m.evolutionCondition = config.evolutionCondition || null;
-        discoverPokemon(config.name); saveGame(); updateUI();
+        
+        // Mise à jour des stats et infos
+        m.name = config.name; 
+        m.image = config.image; 
+        m.incomePerMin = Math.floor(config.incomePerMin * potentialRatio);
+        m.evolutionLevel = config.evolutionLevel || null; 
+        m.nextForm = config.nextForm || null; 
+        m.evolutionCondition = config.evolutionCondition || null;
+        
+        // LIGNE AJOUTÉE POUR RÉGLER LE BUG DES PIERRES :
+        m.itemNeeded = config.itemNeeded || null;
+        
+        discoverPokemon(config.name); 
+        saveGame(); 
+        updateUI();
     }
 }
-
 function startExpedition(id) {
     if (gameState.activeExpedition) return;
     let free = gameState.activeTeam.filter(m => !m.onExpedition); if (free.length === 0) return;
@@ -766,15 +779,39 @@ function createCard(m, loc) {
 
     let isReadyForLevelEvo = (m.nextForm && !m.onExpedition && loc === 'team' && m.evolutionCondition === "level" && m.level >= m.evolutionLevel);
     
-    // --- GESTION DES PIERRES (Multi-pierres supporté) ---
+   // --- GESTION DES PIERRES (VERSION ULTRA-SÉCURISÉE) ---
     let htmlBouton = "";
-    if (m.evolutionCondition === "item" && m.itemNeeded && loc === 'reserve') {
-        // On transforme en tableau si c'est une seule pierre, pour gérer les cas multiples (Ortide/Têtarte)
-        let items = Array.isArray(m.itemNeeded) ? m.itemNeeded : [m.itemNeeded];
+    let itemNeeded = m.itemNeeded;
+    
+    // Si evolutionCondition est "item" mais que itemNeeded est null/undefined,
+    // on cherche dans le Pokédex sans risquer de faire planter le jeu
+    if (m.evolutionCondition === "item" && !itemNeeded && typeof POKEDEX !== 'undefined') {
+        try {
+            for (let region in POKEDEX) {
+                if (POKEDEX[region] && typeof POKEDEX[region] === 'object') {
+                    for (let rarity in POKEDEX[region]) {
+                        if (Array.isArray(POKEDEX[region][rarity])) {
+                            let basePoke = POKEDEX[region][rarity].find(p => p && p.name === m.name);
+                            if (basePoke && basePoke.itemNeeded) {
+                                itemNeeded = basePoke.itemNeeded;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération de la pierre dans le Pokédex :", error);
+        }
+    }
+
+    // Affichage du bouton de la pierre (uniquement dans la réserve)
+    if (m.evolutionCondition === "item" && itemNeeded && loc === 'reserve') {
+        let items = Array.isArray(itemNeeded) ? itemNeeded : [itemNeeded];
         
         items.forEach(itemId => {
-            let pierre = ITEMS_CONFIG[itemId];
-            if (pierre) {
+            if (typeof ITEMS_CONFIG !== 'undefined' && ITEMS_CONFIG[itemId]) {
+                let pierre = ITEMS_CONFIG[itemId];
                 htmlBouton += `
                     <button class="pierre-btn" onclick="event.stopPropagation(); tenterEvolution('${m.id}', '${itemId}')" title="Utiliser ${pierre.name}">
                         <img src="${pierre.image}" style="width: 24px; height: 24px; display: block;">
@@ -784,7 +821,6 @@ function createCard(m, loc) {
     } else if (isReadyForLevelEvo) {
         htmlBouton = `<button class="btn-evo-simple" onclick="event.stopPropagation(); evolveMonster('${m.id}')">Évoluer</button>`;
     }
-
     let tick = calculateTickIncome(m);
     let affichagePO = m.isBaby ? `⭐ +${tick} PO` : `+${tick} PO`;
 
@@ -1169,7 +1205,7 @@ function ouvrirDevStats(pokeRef) {
 function validerGenerationDev() {
     if (!pokemonEnCoursDeGeneration) return;
     
-    let level = parseInt(document.getElementById("dev-poke-level").value) || 1;
+    let level = parseInt(document.getElementById("dev-poke-lvl").value) || 1;
     let income = parseInt(document.getElementById("dev-poke-income").value) || 100;
     let ref = pokemonEnCoursDeGeneration;
 
